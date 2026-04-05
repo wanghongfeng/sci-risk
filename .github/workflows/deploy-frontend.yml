@@ -38,7 +38,7 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_API_BASE_URL: https://weak-zondra-laosha007-8931c4eb.koyeb.app
+          VITE_API_BASE_URL: https://weak-zondra-laosha007-8931c4eb.koyeb.app/api
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
