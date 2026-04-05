@@ -1,6 +1,6 @@
 # 供应链控制塔前端
 
-基于 Vue 3 + Vite + Element Plus 的风险模拟平台前端应用。
+基于 Vue 3+Vite+Element Plus 的风险模拟平台前端应用。
 
 ## 项目结构
 
@@ -26,15 +26,15 @@ frontend/
 
 ## 技术栈
 
-| 技术 | 说明 |
-|------|------|
-| Vue 3 | 渐进式 JavaScript 框架（Composition API） |
-| Vite | 新一代前端构建工具 |
-| Element Plus | Vue 3 UI 组件库 |
-| ECharts | 数据可视化图表库 |
-| D3.js | 数据驱动文档（全球旋转地图） |
-| Axios | HTTP 请求客户端 |
-| Vue Router | Vue 官方路由管理器 |
+| 技术           | 说明                                 |
+| ------------ | ---------------------------------- |
+| Vue 3        | 渐进式 JavaScript 框架（Composition API） |
+| Vite         | 新一代前端构建工具                          |
+| Element Plus | Vue 3 UI 组件库                       |
+| ECharts      | 数据可视化图表库                           |
+| D3.js        | 数据驱动文档（全球旋转地图）                     |
+| Axios        | HTTP 请求客户端                         |
+| Vue Router   | Vue 官方路由管理器                        |
 
 ## 统一配置
 
@@ -69,10 +69,10 @@ proxy: {
 
 ## 页面路由
 
-| 路径 | 页面 | 说明 |
-|------|------|------|
-| `/dashboard` | Dashboard | 首页（风险图表+旋转地球） |
-| `/menu` | MenuManage | 菜单管理（增删改查+导出） |
+| 路径           | 页面         | 说明            |
+| ------------ | ---------- | ------------- |
+| `/dashboard` | Dashboard  | 首页（风险图表+旋转地球） |
+| `/menu`      | MenuManage | 菜单管理（增删改查+导出） |
 
 ## 页面功能
 
@@ -89,14 +89,15 @@ proxy: {
 
 调用后端 `/api/menu/*` 接口实现菜单维护：
 
-| 接口 | 方法 | 功能 |
-|------|------|------|
-| `/api/menu/tree` | GET | 获取菜单树 |
-| `/api/menu` | POST | 创建菜单 |
-| `/api/menu/{menuId}` | PUT | 更新菜单 |
-| `/api/menu/{menuId}` | DELETE | 删除菜单 |
+| 接口                   | 方法     | 功能    |
+| -------------------- | ------ | ----- |
+| `/api/menu/tree`     | GET    | 获取菜单树 |
+| `/api/menu`          | POST   | 创建菜单  |
+| `/api/menu/{menuId}` | PUT    | 更新菜单  |
+| `/api/menu/{menuId}` | DELETE | 删除菜单  |
 
 功能特性：
+
 - 树形表格展示菜单结构
 - 新增顶级菜单/子菜单
 - 编辑菜单信息
@@ -170,7 +171,8 @@ npm run preview
 
 前端正常运行需要以下后端服务：
 
-| 服务 | 地址 | 说明 |
-|------|------|------|
-| Java 后端 | http://localhost:8080 | 供应链风险模拟接口 |
-| AI Agent | http://localhost:8000 | 智能对话服务 |
+| 服务       | 地址                      | 说明        |
+| -------- | ----------------------- | --------- |
+| Java 后端  | <http://localhost:8080> | 供应链风险模拟接口 |
+| AI Agent | <http://localhost:8000> | 智能对话服务    |
+
