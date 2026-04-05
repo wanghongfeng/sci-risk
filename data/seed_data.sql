@@ -118,13 +118,14 @@ INSERT INTO users (name, photo, status, created_at, password_hash, role) VALUES
 ('hellohello', '123919', 'active', '2026-03-31 09:00:32', '$2b$12$8MI/Vxkjj78M1v4ToXdvfOHcHwrmOa.mqoamQbY76FqVifEjdeh7m', 'viewer'),
 ('test_viewer_pytest', 'test.png', 'active', '2026-03-31 09:08:05', '$2b$12$YFgUMi8IVZUHz12gwYT8keiuJ5sZf6jsIU6hGd54xB7GKORZ.J3im', 'viewer');
 
--- 10. 菜单数据 (5条记录)
+-- 10. 菜单数据 (6条记录)
 INSERT INTO menu (menu_id, menu_name, menu_code, parent_id, route_path, icon, sort_order, is_visible, permission, component) VALUES
 ('M001', '首页', 'dashboard', '0', '/dashboard', 'Dashboard', 1, TRUE, 'dashboard:view', 'Dashboard'),
 ('M002', '关税管理', 'tariff', '0', '/tariff', 'TariffIcon', 2, TRUE, 'tariff:manage', 'TariffLayout'),
 ('M203', '关税模拟', 'tariff-sim', 'M002', '/tariff/simulation', NULL, 3, TRUE, 'tariff:sim', 'TariffSimulation'),
 ('M008', '系统设置', 'system', '0', '/system', 'SystemIcon', 8, TRUE, 'system:manage', 'SystemLayout'),
-('M804', '菜单管理', 'menu-manage', 'M008', '/system/menu', NULL, 1, TRUE, 'system:menu', 'MenuManage');
+('M804', '菜单管理', 'menu-manage', 'M008', '/system/menu', NULL, 1, TRUE, 'system:menu', 'MenuManage'),
+('M805', '算法总览', 'algorithm-overview', 'M008', '/algorithm', 'Cpu', 2, TRUE, 'algorithm:view', 'AlgorithmOverview');
 
 -- =====================================================
 -- 数据统计
