@@ -28,7 +28,7 @@ public class OpenApiConfig {
                                 .name("Apache 2.0")
                                 .url("https://www.apache.org/licenses/LICENSE-2.0")))
                 .servers(List.of(
-                        new Server().url("http://localhost:8080").description("本地开发服务器")
+                        new Server().url("https://weak-zondra-laosha007-8931c4eb.koyeb.app").description("Koyeb 服务器")
                 ))
                 .tags(List.of(
                         new Tag().name("模拟服务").description("关税风险模拟相关接口"),
