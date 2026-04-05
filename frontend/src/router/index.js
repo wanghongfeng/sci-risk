@@ -8,6 +8,7 @@ import RiskScenarios from '../views/RiskScenarios.vue'
 import RiskAnalysis from '../views/RiskAnalysis.vue'
 import SystemUser from '../views/SystemUser.vue'
 import SystemRole from '../views/SystemRole.vue'
+import AlgorithmOverview from '../views/AlgorithmOverview.vue'
 
 const routes = [
   {
@@ -16,6 +17,7 @@ const routes = [
     children: [
       { path: '', redirect: '/dashboard' },
       { path: '/dashboard', name: '首页', component: Dashboard },
+      { path: '/algorithm', name: '算法总览', component: AlgorithmOverview },
       { path: '/tariff', name: '关税管理', component: TariffManagement },
       { path: '/tariff/simulation', name: '关税模拟', component: TariffSimulation },
       { path: '/risk/scenarios', name: '风险场景', component: RiskScenarios },
