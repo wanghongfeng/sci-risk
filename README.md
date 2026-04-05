@@ -474,3 +474,193 @@ taskkill /PID <PID> /F
 1. 各服务日志输出
 2. 浏览器开发者工具控制台
 3. `data/README.md` 数据说明
+
+---
+
+## 云端部署指南
+
+### 服务部署总览
+
+| 服务 | 部署平台 | 访问地址 |
+|------|----------|----------|
+| 算法服务 (tariff) | Render | https://sci-risk.onrender.com/tariff |
+| 算法服务 (scenario) | Render | https://sci-risk.onrender.com/scenario |
+| Java 后端 | Koyeb | https://weak-zondra-laosha007-8931c4eb.koyeb.app |
+| Vue3 前端 | GitHub Pages | https://wanghongfeng.github.io/sci-risk/ |
+
+### 1. 算法服务部署 (Render)
+
+#### 部署步骤
+
+1. 注册 [Render](https://render.com/)
+2. 创建 **Web Service**
+3. 连接到 GitHub 仓库 `wanghongfeng/sci-risk`
+4. 配置以下设置：
+
+| 配置项 | 值 |
+|--------|-----|
+| Root Directory | `algorithms/risk-algorithm-service` |
+| Build Command | `pip install -r requirements.txt` |
+| Start Command | `python main.py` |
+| Health Check URL | `/health` |
+| Instance Type | Free |
+
+5. 创建两个服务：
+   - **tariff 服务**: 环境变量 `ALGORITHM_PORT=5000`
+   - **scenario 服务**: 环境变量 `ALGORITHM_PORT=5001`
+
+6. 设置环境变量：
+   ```
+   BACKEND_URL=https://weak-zondra-laosha007-8931c4eb.koyeb.app
+   ```
+
+#### Render 休眠问题
+
+Render Free 实例会在 15 分钟无活动后休眠。已配置后端 Keep-Alive 定时任务每 13 分钟唤醒。
+
+### 2. 后端服务部署 (Koyeb)
+
+#### 部署步骤
+
+1. 注册 [Koyeb](https://www.koyeb.com/)
+2. 创建 **Web Service**，选择 Dockerfile 部署
+3. 配置：
+
+| 配置项 | 值 |
+|--------|-----|
+| Dockerfile Path | `backend/Dockerfile` |
+| Region | `was` (Asia) |
+| Instance Type | free |
+| Port | `8000` |
+| Health Check Port | `8000` |
+
+4. 设置环境变量：
+
+| 变量名 | 值 |
+|--------|-----|
+| `ALGORITHM_TARIFF_ENDPOINT` | `https://sci-risk.onrender.com/tariff/execute` |
+| `ALGORITHM_SCENARIO_ENDPOINT` | `https://sci-risk.onrender.com/scenario/execute` |
+| `CALLBACK_URL` | `https://weak-zondra-laosha007-8931c4eb.koyeb.app` |
+| `DATABASE_URL` | `jdbc:postgresql://...` (Neon 数据库连接) |
+| `DB_USERNAME` | `neondb_owner` |
+| `DB_PASSWORD` | `xxx` |
+| `SERVER_PORT` | `8000` |
+
+#### 常见问题
+
+**1. "URL must start with 'jdbc'"**
+- 确保 `DATABASE_URL` 环境变量值以 `jdbc:` 开头
+- 完整格式：`jdbc:postgresql://...`
+
+**2. Health Check 失败**
+- 确认 `SERVER_PORT` 和 Health Check Port 都是 `8000`
+- Koyeb 健康检查端口不可自定义
+
+**3. 算法注册失败**
+- 确认 `ALGORITHM_TARIFF_ENDPOINT` 和 `ALGORITHM_SCENARIO_ENDPOINT` 包含 `/execute` 后缀
+- 检查 Render 服务是否已部署且未休眠
+
+### 3. 前端部署 (GitHub Pages)
+
+#### GitHub Actions 配置
+
+项目已配置 `.github/workflows/deploy-frontend.yml`，推送 `frontend/` 目录下文件时自动触发部署。
+
+#### 首次启用步骤
+
+1. 进入仓库 **Settings** → **Pages**
+2. **Source** 选择 **GitHub Actions**
+3. 进入 **Settings** → **Actions** → **General**
+4. **Workflow permissions** 选择 **Read and write permissions**
+5. 点击 **Save**
+
+#### 手动触发部署
+
+推送 `frontend/` 目录下的文件，或在 Actions 页面手动触发：
+
+1. 进入 **https://github.com/wanghongfeng/sci-risk/actions**
+2. 点击 **"Deploy Frontend to GitHub Pages"**
+3. 点击 **"Run workflow"**
+
+#### 部署地址
+
+- 生产环境: https://wanghongfeng.github.io/sci-risk/
+
+### 4. GitHub Actions 常见问题
+
+**1. Node.js 20 已弃用警告**
+
+如遇 Node.js 20 弃用错误，在 workflow 文件中设置：
+
+```yaml
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+```
+
+并使用 `node-version: '24'`。
+
+**2. "npm ci" 失败**
+
+如果前端没有 `package-lock.json`，使用 `npm install` 代替 `npm ci`：
+
+```yaml
+- name: Install dependencies
+  run: npm install
+```
+
+**3. 缓存路径错误**
+
+确保 `cache-dependency-path` 相对于 `working-directory`，或移除缓存配置。
+
+**4. Actions 未自动触发**
+
+- 确认 workflow 文件在 `.github/workflows/` 目录
+- 确认推送的文件在 `paths` 指定的目录下
+- 检查 **Settings** → **Actions** → **General** 权限设置
+
+### 5. 环境变量速查表
+
+#### 本地开发 (.env)
+
+```
+# 算法服务
+ALGORITHM_TARIFF_ENDPOINT=http://localhost:5000/tariff/execute
+ALGORITHM_SCENARIO_ENDPOINT=http://localhost:5000/scenario/execute
+
+# 数据库
+DB_URL=jdbc:postgresql://...
+DB_USERNAME=neondb_owner
+DB_PASSWORD=xxx
+
+# AI Agent
+CALLBACK_URL=http://localhost:8080
+```
+
+#### Koyeb 生产环境
+
+```
+ALGORITHM_TARIFF_ENDPOINT=https://sci-risk.onrender.com/tariff/execute
+ALGORITHM_SCENARIO_ENDPOINT=https://sci-risk.onrender.com/scenario/execute
+CALLBACK_URL=https://weak-zondra-laosha007-8931c4eb.koyeb.app
+DATABASE_URL=jdbc:postgresql://neondb_owner:xxx@ep-xxx.pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+DB_USERNAME=neondb_owner
+DB_PASSWORD=xxx
+SERVER_PORT=8000
+```
+
+### 6. 端口配置对照表
+
+| 环境 | 后端端口 | 算法端口 | AI Agent 端口 |
+|------|----------|----------|---------------|
+| 本地开发 | 8080 | 5000 | 8000 |
+| Koyeb | 8000 | 443 (HTTPS) | N/A |
+
+### 7. Keep-Alive 机制
+
+后端已配置定时任务防止 Render 服务休眠：
+
+- 文件: `backend/risk-basic-service/src/main/java/com/sci/risk/config/KeepAliveConfig.java`
+- 间隔: 13 分钟 (780000ms)
+- 目标: `/health` 端点
+
+修改后需重新部署 Koyeb 使配置生效。
