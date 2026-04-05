@@ -65,9 +65,7 @@ public class SimulationService {
         }
 
         try {
-            // 优先调用统一入口 /algorithm/execute，降级到旧版 /execute
-            String baseUrl = extractBaseUrl(algorithm.getEndpoint());
-            String executeUrl = baseUrl + "/algorithm/execute";
+            String executeUrl = algorithm.getEndpoint();
 
             webClient.post()
                     .uri(executeUrl)
