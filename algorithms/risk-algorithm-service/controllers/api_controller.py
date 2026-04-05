@@ -1,4 +1,4 @@
-﻿from flask import Blueprint, request, jsonify
+﻿﻿from flask import Blueprint, request, jsonify
 from services import registry_service, algorithm_service
 from models.entities import TaskRequest
 from config import settings
