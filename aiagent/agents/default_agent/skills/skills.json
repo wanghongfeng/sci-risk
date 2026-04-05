@@ -1,0 +1,18 @@
+[
+  {
+    "skill_id": "general_query",
+    "skill_name": "通用查询",
+    "description": "处理通用问题和信息查询",
+    "enabled": true,
+    "permissions_required": [],
+    "parameters": {}
+  },
+  {
+    "skill_id": "info_provide",
+    "skill_name": "信息提供",
+    "description": "提供系统信息和帮助",
+    "enabled": true,
+    "permissions_required": [],
+    "parameters": {}
+  }
+]

@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: risk-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+      - aiagent
+    networks:
+      - risk-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: risk-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_URL=${DB_URL}
+      - CALLBACK_URL=http://backend:8080
+      - ALGORITHM_TARIFF_ENDPOINT=http://algorithm:5000/tariff
+      - ALGORITHM_SCENARIO_ENDPOINT=http://algorithm:5000/scenario
+      - ALGORITHM_ML_ENDPOINT=http://ml-algorithm:5001/ml
+    networks:
+      - risk-network
+
+  algorithm:
+    build:
+      context: ./algorithms/risk-algorithm-service
+      dockerfile: Dockerfile
+    container_name: risk-algorithm
+    ports:
+      - "5000:5000"
+    environment:
+      - BACKEND_URL=http://backend:8080
+    depends_on:
+      - backend
+    networks:
+      - risk-network
+
+  ml-algorithm:
+    build:
+      context: ./algorithms/risk-ml-algorithm
+      dockerfile: Dockerfile
+    container_name: risk-ml-algorithm
+    ports:
+      - "5001:5001"
+    environment:
+      - BACKEND_URL=http://backend:8080
+      - SERVICE_PORT=5001
+    depends_on:
+      - backend
+    networks:
+      - risk-network
+
+  aiagent:
+    build:
+      context: ./aiagent
+      dockerfile: Dockerfile
+    container_name: risk-aiagent
+    ports:
+      - "8000:8000"
+    networks:
+      - risk-network
+
+networks:
+  risk-network:
+    driver: bridge

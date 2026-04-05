@@ -1,0 +1,13 @@
+{
+  "mcp_version": "1.0",
+  "name": "default_agent_mcp",
+  "description": "默认智能体 MCP 协议配置",
+  "context_window": 2048,
+  "model_settings": {
+    "temperature": 0.5,
+    "max_tokens": 1024,
+    "top_p": 0.9
+  },
+  "tools": [],
+  "data_sources": []
+}

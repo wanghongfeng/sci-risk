@@ -1,0 +1,36 @@
+[
+  {
+    "skill_id": "tariff_analysis",
+    "skill_name": "关税分析",
+    "description": "分析进出口商品的关税税率和政策影响",
+    "enabled": true,
+    "permissions_required": ["tariff:read"],
+    "parameters": {
+      "product_code": "string",
+      "country": "string",
+      "trade_type": "import|export"
+    }
+  },
+  {
+    "skill_id": "policy_query",
+    "skill_name": "政策查询",
+    "description": "查询最新的关税政策和贸易协定",
+    "enabled": true,
+    "permissions_required": ["policy:read"],
+    "parameters": {
+      "policy_type": "string",
+      "effective_date": "date"
+    }
+  },
+  {
+    "skill_id": "trade_analysis",
+    "skill_name": "贸易分析",
+    "description": "分析贸易战对特定行业的影响",
+    "enabled": true,
+    "permissions_required": ["trade:analyze"],
+    "parameters": {
+      "industry": "string",
+      "time_range": "string"
+    }
+  }
+]

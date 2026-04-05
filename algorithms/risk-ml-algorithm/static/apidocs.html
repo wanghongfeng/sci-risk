@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML算法服务 API 文档</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui.css">
+    <style>
+        body { margin: 0; padding: 0; }
+        .topbar { background: #2d2d2d; padding: 10px 20px; color: white; }
+        .topbar h1 { margin: 0; font-size: 20px; }
+    </style>
+</head>
+<body>
+    <div class="topbar"><h1>ML算法服务 API 文档</h1></div>
+    <div id="swagger-ui"></div>
+    <script src="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui-bundle.js"></script>
+    <script>
+        window.onload = function() {
+            SwaggerUIBundle({
+                url: "/apispec.json",
+                dom_id: '#swagger-ui',
+                deepLinking: true
+            });
+        };
+    </script>
+</body>
+</html>

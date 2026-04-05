@@ -1,0 +1,32 @@
+{
+  "mcp_version": "1.0",
+  "name": "tariff_agent_mcp",
+  "description": "关税智能体 MCP 协议配置",
+  "context_window": 4096,
+  "model_settings": {
+    "temperature": 0.7,
+    "max_tokens": 2048,
+    "top_p": 0.9
+  },
+  "tools": [
+    {
+      "tool_id": "query_tariff_rate",
+      "name": "查询关税税率",
+      "description": "查询指定商品编码和国家的关税税率",
+      "parameters": ["product_code", "country"]
+    },
+    {
+      "tool_id": "analyze_trade_impact",
+      "name": "分析贸易影响",
+      "description": "分析贸易政策对指定行业的影响",
+      "parameters": ["industry", "country"]
+    }
+  ],
+  "data_sources": [
+    {
+      "source_id": "tariff_database",
+      "name": "关税数据库",
+      "permissions_required": ["tariff:read"]
+    }
+  ]
+}
