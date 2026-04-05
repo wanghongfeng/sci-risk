@@ -1,6 +1,6 @@
 # 供应链控制塔前端
 
-基于 Vue3 + Vite + Element Plus 的风险模拟平台前端应用。
+基于 Vue3  + Vite + Element Plus 的风险模拟平台前端应用。
 
 ## 项目结构
 
