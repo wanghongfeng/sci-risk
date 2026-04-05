@@ -1,9 +1,9 @@
 FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
-COPY pom.xml .
-COPY risk-basic-service/pom.xml ./risk-basic-service/
+COPY backend/pom.xml .
+COPY backend/risk-basic-service/pom.xml ./risk-basic-service/
 RUN mvn dependency:go-offline -B -f risk-basic-service/pom.xml
-COPY risk-basic-service/src ./risk-basic-service/src
+COPY backend/risk-basic-service/src ./risk-basic-service/src
 RUN mvn package -DskipTests -B -f risk-basic-service/pom.xml
 
 FROM eclipse-temurin:17-jre
