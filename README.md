@@ -468,6 +468,92 @@ taskkill /PID <PID> /F
 | AI | FastAPI, Pydantic |
 | 文档 | Swagger/OpenAPI |
 
+## 调试与故障排查
+
+### 1. 数据库连接问题排查
+
+#### JDBC URL 格式错误
+**症状**: 访问 `/api/menu/*` 返回 500 错误，日志显示 `org.postgresql.Driver claims to not accept jdbcUrl`
+
+**原因**: `DB_URL` 环境变量格式不正确，用户名密码被错误地包含在 URL 中
+
+**错误示例**:
+```
+jdbc:postgresql://neondb_owner:npg_xxx@ep-cool-night-xxx.pooler.c-5.us-east-1.aws.neon.tech/neondb
+```
+
+**正确格式**:
+```
+jdbc:postgresql://ep-cool-night-xxx.pooler.c-5.us-east-1.aws.neon.tech:5432/neondb?sslmode=require
+```
+用户名和密码应通过单独的 `DB_USERNAME` 和 `DB_PASSWORD` 环境变量传递。
+
+**验证方法**: 在 Koyeb Dashboard 查看日志，确认 HikariCP 连接池初始化成功。
+
+### 2. 算法服务调用失败排查
+
+#### 404 Not Found 错误
+**症状**: 前端显示 "调用算法服务失败: 404 Not Found"
+
+**排查步骤**:
+1. 确认 onrender.com 算法服务可达：
+   ```bash
+   curl -X POST https://sci-risk.onrender.com/tariff/execute -H "Content-Type: application/json" -d '{"taskId":"test","params":{}}'
+   ```
+2. 检查 Koyeb 后端日志中算法注册的 endpoint 是否正确
+3. 确认 `ALGORITHM_TARIFF_ENDPOINT` 包含 `/execute` 后缀
+
+#### 算法注册端点格式
+后端代码 `SimulationService.java` 中直接使用注册的 endpoint 完整路径：
+```java
+String executeUrl = algorithm.getEndpoint();  // 直接使用，不再拼接
+```
+
+因此注册时应使用完整的 execute 路径：
+- `ALGORITHM_TARIFF_ENDPOINT`: `https://sci-risk.onrender.com/tariff/execute`
+- `ALGORITHM_SCENARIO_ENDPOINT`: `https://sci-risk.onrender.com/scenario/execute`
+
+### 3. 前端 API 请求 404
+
+**症状**: 前端显示 `GET https://weak-zondra-laosha007-8931c4eb.koyeb.app/menu/list 404`
+
+**原因**: GitHub Actions 构建时 `VITE_API_BASE_URL` 缺少 `/api` 前缀
+
+**排查**: 检查 `.github/workflows/deploy-frontend.yml` 中：
+```yaml
+VITE_API_BASE_URL: https://weak-zondra-laosha007-8931c4eb.koyeb.app/api  # 正确
+```
+
+### 4. Swagger 地址问题
+
+**症状**: Swagger UI 中 Server 选择显示 `http://localhost:8080`
+
+**解决**: 修改 `backend/risk-basic-service/src/main/java/com/sci/risk/config/OpenApiConfig.java` 中的 server URL
+
+### 5. 服务健康检查
+
+#### 后端健康检查
+```bash
+curl https://weak-zondra-laosha007-8931c4eb.koyeb.app/api/algorithm/list
+```
+
+#### 算法服务健康检查
+```bash
+curl -X GET https://sci-risk.onrender.com/health
+```
+
+### 6. 常见错误代码
+
+| HTTP 状态码 | 可能原因 |
+|-------------|---------|
+| 400 | 请求参数格式错误，算法服务可达但参数不对 |
+| 404 | 路径错误、服务未启动、或 Render 休眠 |
+| 500 | 后端代码错误，可能是数据库连接失败 |
+| 502/503 | 后端服务不可用 |
+| 504 | 请求超时，算法执行时间过长 |
+
+---
+
 ## 联系与支持
 
 如有问题，请检查：
@@ -538,13 +624,13 @@ Render Free 实例会在 15 分钟无活动后休眠。已配置后端 Keep-Aliv
 
 | 变量名 | 值 |
 |--------|-----|
-| `ALGORITHM_TARIFF_ENDPOINT` | `https://sci-risk.onrender.com/tariff/execute` |
-| `ALGORITHM_SCENARIO_ENDPOINT` | `https://sci-risk.onrender.com/scenario/execute` |
-| `CALLBACK_URL` | `https://weak-zondra-laosha007-8931c4eb.koyeb.app` |
-| `DATABASE_URL` | `jdbc:postgresql://...` (Neon 数据库连接) |
+| `DB_URL` | `jdbc:postgresql://ep-xxx.pooler.c-5.us-east-1.aws.neon.tech:5432/neondb?sslmode=require` |
 | `DB_USERNAME` | `neondb_owner` |
 | `DB_PASSWORD` | `xxx` |
 | `SERVER_PORT` | `8000` |
+| `ALGORITHM_TARIFF_ENDPOINT` | `https://sci-risk.onrender.com/tariff/execute` |
+| `ALGORITHM_SCENARIO_ENDPOINT` | `https://sci-risk.onrender.com/scenario/execute` |
+| `CALLBACK_URL` | `https://weak-zondra-laosha007-8931c4eb.koyeb.app` |
 
 #### 常见问题
 
@@ -623,13 +709,13 @@ env:
 #### 本地开发 (.env)
 
 ```
-# 算法服务
+# 算法服务 - 注意：本地需要 /execute 后缀
 ALGORITHM_TARIFF_ENDPOINT=http://localhost:5000/tariff/execute
 ALGORITHM_SCENARIO_ENDPOINT=http://localhost:5000/scenario/execute
 
 # 数据库
-DB_URL=jdbc:postgresql://...
-DB_USERNAME=neondb_owner
+DB_URL=jdbc:postgresql://localhost:5432/sci_risk
+DB_USERNAME=postgres
 DB_PASSWORD=xxx
 
 # AI Agent
@@ -642,7 +728,7 @@ CALLBACK_URL=http://localhost:8080
 ALGORITHM_TARIFF_ENDPOINT=https://sci-risk.onrender.com/tariff/execute
 ALGORITHM_SCENARIO_ENDPOINT=https://sci-risk.onrender.com/scenario/execute
 CALLBACK_URL=https://weak-zondra-laosha007-8931c4eb.koyeb.app
-DATABASE_URL=jdbc:postgresql://neondb_owner:xxx@ep-xxx.pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+DB_URL=jdbc:postgresql://ep-xxx.pooler.c-5.us-east-1.aws.neon.tech:5432/neondb?sslmode=require
 DB_USERNAME=neondb_owner
 DB_PASSWORD=xxx
 SERVER_PORT=8000
