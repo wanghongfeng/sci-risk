@@ -44,17 +44,6 @@ public class AlgorithmInitConfig {
                 "风险场景分析"
             ));
 
-            // ── 风险分类 > ML综合评估 ──────────────────────────────────
-            registry.register(new AlgorithmInfo(
-                "risk-ml-algorithm",
-                "1.0.0",
-                mlEndpoint,
-                "基于机器学习的供应链风险预测算法",
-                "risk",
-                "assessment",
-                "ML风险评估"
-            ));
-
             System.out.println("=== 算法注册完成 ===");
             registry.getAllAlgorithms().forEach(a ->
                 System.out.println(String.format("- [%s/%s] %s -> %s",
