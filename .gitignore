@@ -50,19 +50,6 @@ dist-ssr/
 
 # =============================================================================
 # IDE
-# =============================================================================
-.idea/
-*.iml
-*.iws
-*.ipr
-.project
-.settings/
-.classpath
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
 
 # =============================================================================
 # OS
@@ -99,6 +86,7 @@ logs/
 .env.local
 .env.*.local
 .env.production
+.env.cloud
 secrets/
 credentials/
 *.pem

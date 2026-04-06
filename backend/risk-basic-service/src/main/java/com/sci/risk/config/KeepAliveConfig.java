@@ -15,8 +15,11 @@ import java.net.URL;
 @EnableScheduling
 public class KeepAliveConfig {
 
-    @Value("${app.render.health-url:https://sci-risk.onrender.com/health}")
-    private String renderHealthUrl;
+    @Value("${app.algorithm.tariff-endpoint:http://localhost:5000/tariff}")
+    private String tariffEndpoint;
+
+    @Value("${app.algorithm.scenario-endpoint:http://localhost:5000/scenario}")
+    private String scenarioEndpoint;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -24,18 +27,21 @@ public class KeepAliveConfig {
     public CommandLineRunner keepAliveTask() {
         return args -> {
             System.out.println("=== Keep-Alive 配置完成 ===");
-            System.out.println("Render Health URL: " + renderHealthUrl);
+            System.out.println("Tariff Endpoint: " + tariffEndpoint);
+            System.out.println("Scenario Endpoint: " + scenarioEndpoint);
         };
     }
 
     @Scheduled(fixedRate = 600000)
     public void pingAlgorithmServices() {
-        pingService(renderHealthUrl, "Render算法服务");
+        pingService(tariffEndpoint, "Tariff算法服务");
+        pingService(scenarioEndpoint, "Scenario算法服务");
     }
 
     private void pingService(String endpoint, String serviceName) {
         try {
-            URL url = new URL(endpoint.replace("/execute", "/health"));
+            String healthUrl = endpoint.replace("/execute", "/health");
+            URL url = new URL(healthUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setConnectTimeout(5000);

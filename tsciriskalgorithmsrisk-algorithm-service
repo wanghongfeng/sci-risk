@@ -1,0 +1,3 @@
+[33m6196d96[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m feat: 算法注册中心 - 支持远程算法服务代理和动态端点生成
+[33m10b2879[m fix: simplify KeepAlive to ping single Render /health endpoint every 10 minutes
+[33mef4f819[m feat: add AlgorithmOverview menu to seed_data.sql

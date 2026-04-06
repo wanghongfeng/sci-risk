@@ -3,6 +3,21 @@ from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
 import os
 import uvicorn
+from pathlib import Path
+
+ENV = os.environ.get('ENVIRONMENT', 'local')
+ENV_FILE = Path(__file__).parent / f'.env.{ENV}'
+
+def load_env_file():
+    if ENV_FILE.exists():
+        with open(ENV_FILE) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    key, value = line.split('=', 1)
+                    os.environ.setdefault(key.strip(), value.strip())
+
+load_env_file()
 
 from core.intent_classifier import IntentClassifier
 from services.agent_factory import AgentFactory
@@ -224,4 +239,5 @@ async def create_test_token(user_id: str, username: str, permissions: str, data_
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.environ.get('AI_AGENT_PORT', 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)

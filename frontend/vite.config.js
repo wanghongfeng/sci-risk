@@ -29,7 +29,8 @@ export default defineConfig(({ mode }) => {
         },
         '/ai': {
           target: 'http://localhost:8000',
-          changeOrigin: true
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/ai/, '')
         }
       }
     },

@@ -146,6 +146,46 @@ console.log(result.agent_name) // 来源 Agent 名称
 }
 ```
 
+## 多环境配置
+
+前端支持**本机环境**和**云端环境**两种配置模式。
+
+### 环境地址
+
+| 环境 | Java 后端 | AI Agent |
+|------|-----------|----------|
+| 本机 | http://localhost:8080 | http://localhost:8000 |
+| 云端 | https://weak-zondra-laosha007-8931c4eb.koyeb.app | https://weak-zondra-laosha007-8931c4eb.koyeb.app |
+
+### 环境配置文件
+
+- `.env.local` - 本机环境配置
+- `.env.cloud` - 云端环境配置
+
+### 使用方式
+
+```bash
+# 本机开发
+npm run dev  # 默认使用 .env.local
+
+# 构建云端版本
+npm run build:cloud  # 使用 .env.cloud
+```
+
+### 手动切换环境
+
+```bash
+# 本机环境
+set VITE_ENV=local
+npm run dev
+
+# 云端环境
+set VITE_ENV=production
+npm run build
+```
+
+---
+
 ## 开发命令
 
 ```bash
@@ -171,8 +211,8 @@ npm run preview
 
 前端正常运行需要以下后端服务：
 
-| 服务       | 地址                      | 说明        |
-| -------- | ----------------------- | --------- |
-| Java 后端  | <http://localhost:8080> | 供应链风险模拟接口 |
-| AI Agent | <http://localhost:8000> | 智能对话服务    |
+| 服务       | 本机地址                      | 云端地址                                    |
+| -------- | --------------------------- | ---------------------------------------- |
+| Java 后端  | <http://localhost:8080>      | <https://weak-zondra-laosha007-8931c4eb.koyeb.app> |
+| AI Agent | <http://localhost:8000>      | <https://weak-zondra-laosha007-8931c4eb.koyeb.app> |
 

@@ -1,7 +1,13 @@
 package com.sci.risk.service;
 
 import com.sci.risk.model.AlgorithmInfo;
+import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,27 +15,87 @@ import java.util.stream.Collectors;
 
 @Service
 public class AlgorithmRegistryService {
-    private final Map<String, AlgorithmInfo> registry = new ConcurrentHashMap<>();
+    private static final Logger log = LoggerFactory.getLogger(AlgorithmRegistryService.class);
 
-    public void register(AlgorithmInfo algorithm) {
-        // 如果是自注册（category/type 为空），保留已有的 category/type/label 信息
-        AlgorithmInfo existing = registry.get(algorithm.getName());
-        if (existing != null) {
-            if (algorithm.getCategory() == null || algorithm.getCategory().isBlank()) {
-                algorithm.setCategory(existing.getCategory());
+    @Value("${app.algorithm.registry-url:http://localhost:5000}")
+    private String registryUrl;
+
+    @Value("${app.algorithm.sync-interval:60000}")
+    private long syncInterval;
+
+    private final Map<String, AlgorithmInfo> registry = new ConcurrentHashMap<>();
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    @PostConstruct
+    public void init() {
+        syncAlgorithms();
+    }
+
+    @Scheduled(fixedDelayString = "${app.algorithm.sync-interval:60000}")
+    public void syncAlgorithms() {
+        try {
+            String algorithmsUrl = registryUrl + "/algorithms?includeRemote=true";
+            @SuppressWarnings("unchecked")
+            Map<String, Object> response = restTemplate.getForObject(algorithmsUrl, Map.class);
+
+            if (response == null || !response.containsKey("algorithms")) {
+                log.warn("Failed to sync algorithms: invalid response from registry");
+                return;
             }
-            if (algorithm.getType() == null || algorithm.getType().isBlank()) {
-                algorithm.setType(existing.getType());
+
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> algorithms = (List<Map<String, Object>>) response.get("algorithms");
+
+            registry.clear();
+
+            for (Map<String, Object> algo : algorithms) {
+                AlgorithmInfo info = convertToAlgorithmInfo(algo);
+                info.setStatus("ONLINE");
+                info.setRegisteredTime(System.currentTimeMillis());
+                registry.put(info.getName(), info);
             }
-            if (algorithm.getLabel() == null || algorithm.getLabel().isBlank()) {
-                algorithm.setLabel(existing.getLabel());
+
+            log.info("Synced {} algorithms from registry center", registry.size());
+
+            String categoriesUrl = registryUrl + "/categories";
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> categories = (List<Map<String, Object>>) restTemplate.getForObject(categoriesUrl, List.class);
+            if (categories != null) {
+                log.info("Synced {} categories from registry center", categories.size());
             }
+
+        } catch (Exception e) {
+            log.error("Failed to sync algorithms from registry center: {}", e.getMessage());
         }
-        // 注册即在线
-        algorithm.setStatus("ONLINE");
-        algorithm.setRegisteredTime(System.currentTimeMillis());
-        registry.put(algorithm.getName(), algorithm);
-        System.out.println("Algorithm registered: " + algorithm.getName());
+    }
+
+    private AlgorithmInfo convertToAlgorithmInfo(Map<String, Object> algo) {
+        AlgorithmInfo info = new AlgorithmInfo();
+        info.setName((String) algo.get("name"));
+        info.setVersion((String) algo.get("version"));
+        info.setDescription((String) algo.get("description"));
+        info.setCategory((String) algo.get("category"));
+        info.setType((String) algo.get("type"));
+        info.setLabel((String) algo.get("label"));
+
+        Object endpoint = algo.get("endpoint");
+        if (endpoint == null) {
+            String name = info.getName();
+            String slug = name != null ? name.split("-")[0] : "unknown";
+            info.setEndpoint(registryUrl + "/" + slug + "/execute");
+        } else {
+            info.setEndpoint((String) endpoint);
+        }
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> paramsSchema = (Map<String, Object>) algo.get("paramsSchema");
+        info.setParamsSchema(paramsSchema);
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> outputSchema = (Map<String, Object>) algo.get("outputSchema");
+        info.setOutputSchema(outputSchema);
+
+        return info;
     }
 
     public Optional<AlgorithmInfo> getAlgorithm(String name) {
@@ -40,27 +106,18 @@ public class AlgorithmRegistryService {
         return new ArrayList<>(registry.values());
     }
 
-    /**
-     * 按一级分类过滤算法列表
-     */
     public List<AlgorithmInfo> getByCategory(String category) {
         return registry.values().stream()
                 .filter(a -> category.equals(a.getCategory()))
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 按一级+二级分类过滤
-     */
     public List<AlgorithmInfo> getByCategoryAndType(String category, String type) {
         return registry.values().stream()
                 .filter(a -> category.equals(a.getCategory()) && type.equals(a.getType()))
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 获取两级分类树（供前端分类导航使用）
-     */
     public List<Map<String, Object>> getCategoryTree() {
         Map<String, Map<String, Object>> tree = new LinkedHashMap<>();
         for (AlgorithmInfo algo : registry.values()) {
@@ -108,6 +165,10 @@ public class AlgorithmRegistryService {
         return algo != null && "ONLINE".equals(algo.getStatus());
     }
 
+    public String getRegistryUrl() {
+        return registryUrl;
+    }
+
     private String categoryLabel(String category) {
         switch (category) {
             case "risk": return "风险";
@@ -119,6 +180,7 @@ public class AlgorithmRegistryService {
     }
 
     private String typeLabel(String type) {
+        if (type == null) return "";
         switch (type) {
             case "simulation": return "风险模拟";
             case "classification": return "风险分类";

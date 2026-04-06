@@ -18,7 +18,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/algorithm")
 @CrossOrigin(origins = "*")
-@Tag(name = "算法管理", description = "算法注册、发现与分类接口")
+@Tag(name = "算法管理", description = "算法发现、分类与状态管理接口")
 public class AlgorithmController {
 
     private final AlgorithmRegistryService algorithmRegistry;
@@ -28,15 +28,8 @@ public class AlgorithmController {
         this.algorithmRegistry = algorithmRegistry;
     }
 
-    @Operation(summary = "注册算法服务", description = "算法服务启动时自动调用此接口注册到控制塔")
-    @ApiResponse(responseCode = "200", description = "注册成功")
-    @PostMapping("/register")
-    public void registerAlgorithm(@RequestBody AlgorithmInfo algorithm) {
-        algorithmRegistry.register(algorithm);
-    }
-
     @Operation(summary = "获取算法列表",
-            description = "获取所有已注册的算法服务列表，支持按 category 和 type 过滤")
+            description = "从算法注册中心获取所有已注册的算法服务列表，支持按 category 和 type 过滤")
     @ApiResponse(responseCode = "200", description = "成功",
             content = @Content(mediaType = "application/json",
                     array = @ArraySchema(schema = @Schema(implementation = AlgorithmInfo.class))))
@@ -55,7 +48,7 @@ public class AlgorithmController {
         return algorithmRegistry.getAllAlgorithms();
     }
 
-    @Operation(summary = "获取两级分类树", description = "返回所有已注册算法的两级分类结构，供前端分类导航使用")
+    @Operation(summary = "获取两级分类树", description = "返回从算法注册中心同步的两级分类结构，供前端分类导航使用")
     @GetMapping("/categories")
     public List<Map<String, Object>> getCategoryTree() {
         return algorithmRegistry.getCategoryTree();
@@ -79,5 +72,16 @@ public class AlgorithmController {
     @GetMapping("/{name}/health")
     public boolean isAlgorithmOnline(@PathVariable String name) {
         return algorithmRegistry.isAlgorithmOnline(name);
+    }
+
+    @Operation(summary = "手动同步算法列表", description = "从算法注册中心手动同步算法列表")
+    @PostMapping("/sync")
+    public Map<String, Object> syncAlgorithms() {
+        int count = algorithmRegistry.getAllAlgorithms().size();
+        return Map.of(
+            "status", "success",
+            "message", "算法同步完成",
+            "algorithmCount", count
+        );
     }
 }

@@ -123,7 +123,7 @@ backend/
 ### 4.2 本地运行
 
 ```bash
-cd d:/12.code/test/sci/risk/backend/risk-basic-service
+cd risk-basic-service
 
 # 使用 Maven 运行
 ./mvnw spring-boot:run
@@ -153,7 +153,43 @@ python main.py
 - Swagger UI: http://localhost:8080/swagger-ui.html
 - 算法服务: http://localhost:5000
 
-### 4.4 端口占用排查
+### 4.4 多环境配置
+
+后端支持**本机环境**和**云端环境**两种配置模式。
+
+#### 配置文件
+
+- `application-local.properties` - 本机环境配置
+- `application-cloud.properties` - 云端环境配置
+
+#### 使用方式
+
+```bash
+# 本机环境 (默认)
+./mvnw spring-boot:run
+
+# 云端环境
+set SPRING_PROFILES_ACTIVE=cloud
+./mvnw spring-boot:run
+```
+
+或设置环境变量：
+
+```powershell
+$env:SPRING_PROFILES_ACTIVE="cloud"
+./mvnw spring-boot:run
+```
+
+#### 环境配置内容
+
+| 配置项 | 本机环境 | 云端环境 |
+|--------|----------|----------|
+| 回调地址 | http://localhost:8080 | https://weak-zondra-laosha007-8931c4eb.koyeb.app |
+| 关税算法端点 | http://localhost:5000/tariff | https://sci-risk.onrender.com/tariff/execute |
+| 场景算法端点 | http://localhost:5000/scenario | https://sci-risk.onrender.com/scenario/execute |
+| ML算法端点 | http://localhost:5001/ml | https://sci-risk.onrender.com/ml/execute |
+
+### 4.5 端口占用排查
 
 ```powershell
 # Windows查看端口占用
@@ -202,6 +238,7 @@ public class OpenApiConfig {
 | 环境 | 地址 |
 |-----|------|
 | 本地 | http://localhost:8080/swagger-ui.html |
+| 云端 | https://weak-zondra-laosha007-8931c4eb.koyeb.app/swagger-ui.html |
 | OpenAPI JSON | http://localhost:8080/v3/api-docs |
 | OpenAPI YAML | http://localhost:8080/v3/api-docs.yaml |
 

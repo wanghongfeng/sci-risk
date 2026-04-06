@@ -283,19 +283,25 @@ const startSimulation = async () => {
   clearPoll()
 
   try {
-    let res
     const type = algorithmType.value
+    let params = {}
+
     if (type === 'tariff') {
-      res = await api.post('/simulation/start', { tariffRate: tariffRate.value })
+      params = { tariffRate: tariffRate.value }
     } else if (type === 'scenario') {
-      res = await api.post('/simulation/start-risk-scenario', { scenarioType: scenarioType.value })
+      params = { scenarioType: scenarioType.value }
     } else {
       const historical = mlHistoricalData.value.split(',').map(Number).filter(n => !isNaN(n))
-      res = await api.post('/simulation/ml-risk', {
+      params = {
         historicalData: historical,
         riskFactors: { weight: mlRiskWeight.value }
-      })
+      }
     }
+
+    const res = await api.post('/simulation/execute', {
+      algorithmName: algorithmName.value,
+      params
+    })
     task.value = { taskId: res.data.taskId, status: res.data.status, currentStatus: res.data.message }
     pollStatus(res.data.taskId)
   } catch (e) {

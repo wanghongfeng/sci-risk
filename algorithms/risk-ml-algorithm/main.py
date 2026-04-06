@@ -27,7 +27,7 @@ def list_algorithms():
         "algorithms": [{
             "name": ALGORITHM_NAME,
             "version": ALGORITHM_VERSION,
-            "endpoint": f"http://localhost:{ALGORITHM_PORT}/ml",
+            "endpoint": f"http://localhost:{ALGORITHM_PORT}/ml/execute",
             "supported_params": "historicalData,riskFactors",
             "description": "基于机器学习的供应链风险预测算法"
         }]
