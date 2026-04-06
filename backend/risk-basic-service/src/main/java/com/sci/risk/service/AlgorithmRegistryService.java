@@ -58,10 +58,16 @@ public class AlgorithmRegistryService {
             log.info("Synced {} algorithms from registry center", registry.size());
 
             String categoriesUrl = registryUrl + "/categories";
-            @SuppressWarnings("unchecked")
-            List<Map<String, Object>> categories = (List<Map<String, Object>>) restTemplate.getForObject(categoriesUrl, List.class);
-            if (categories != null) {
-                log.info("Synced {} categories from registry center", categories.size());
+            try {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> categoriesResponse = restTemplate.getForObject(categoriesUrl, Map.class);
+                if (categoriesResponse != null && categoriesResponse.containsKey("categories")) {
+                    @SuppressWarnings("unchecked")
+                    List<Map<String, Object>> categories = (List<Map<String, Object>>) categoriesResponse.get("categories");
+                    log.info("Synced {} categories from registry center", categories.size());
+                }
+            } catch (Exception e) {
+                log.warn("Failed to sync categories: {}", e.getMessage());
             }
 
         } catch (Exception e) {
