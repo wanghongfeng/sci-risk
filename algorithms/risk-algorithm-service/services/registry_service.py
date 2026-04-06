@@ -65,7 +65,7 @@ class RegistryService:
             'tariff-risk-algorithm': 'tariff',
             'risk-scenarios-algorithm': 'scenario',
         }
-        slug_base = f'http://localhost:{settings.ALGORITHM_PORT}'
+        slug_base = settings.ALGORITHM_BASE_URL
         local_algos = [
             {
                 'name': a.name,

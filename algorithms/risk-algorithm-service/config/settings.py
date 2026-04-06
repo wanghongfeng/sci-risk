@@ -21,6 +21,7 @@ class Settings:
     ALGORITHM_PORT: int = int(os.environ.get('ALGORITHM_PORT', 5000))
     DEBUG: bool = os.environ.get('DEBUG', 'False').lower() == 'true'
     ENVIRONMENT: str = os.environ.get('ENVIRONMENT', 'local')
+    ALGORITHM_BASE_URL: str = os.environ.get('ALGORITHM_BASE_URL', f'http://localhost:{ALGORITHM_PORT}')
 
     CALLBACK_TIMEOUT: int = 5
     TASK_THREAD_DAEMON: bool = True
