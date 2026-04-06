@@ -4,7 +4,6 @@ from models.entities import AlgorithmInfo
 from config import settings
 
 
-# 两级分类的中文标签
 CATEGORY_LABELS = {
     'risk': '风险',
     'plan': '计划',
@@ -26,7 +25,6 @@ TYPE_LABELS = {
     'optimization': '优化建议',
 }
 
-# 算法名称 → URL片段的映射（用于端点生成）
 _NAME_TO_SLUG: Dict[str, str] = {
     'tariff-risk-algorithm': 'tariff',
     'risk-scenarios-algorithm': 'scenario',
@@ -36,12 +34,15 @@ _NAME_TO_SLUG: Dict[str, str] = {
 class RegistryService:
     def __init__(self):
         self._algorithms: Dict[str, AlgorithmBase] = {}
+        self._remote_algorithms: Dict[str, AlgorithmInfo] = {}
 
     def register(self, algorithm: AlgorithmBase) -> None:
         self._algorithms[algorithm.name] = algorithm
 
+    def register_remote(self, algorithm_info: AlgorithmInfo) -> None:
+        self._remote_algorithms[algorithm_info.name] = algorithm_info
+
     def get(self, name: str) -> Optional[AlgorithmBase]:
-        """按算法名或 URL slug 查找"""
         algo = self._algorithms.get(name)
         if algo is None:
             for algo_name, slug in _NAME_TO_SLUG.items():
@@ -50,23 +51,68 @@ class RegistryService:
                     break
         return algo
 
+    def get_remote(self, name: str) -> Optional[AlgorithmInfo]:
+        return self._remote_algorithms.get(name)
+
     def get_all(self) -> List[AlgorithmBase]:
         return list(self._algorithms.values())
 
+    def get_all_remote(self) -> List[AlgorithmInfo]:
+        return list(self._remote_algorithms.values())
+
+    def get_all_algorithms(self) -> List[Dict]:
+        slug_map = {
+            'tariff-risk-algorithm': 'tariff',
+            'risk-scenarios-algorithm': 'scenario',
+        }
+        slug_base = f'http://localhost:{settings.ALGORITHM_PORT}'
+        local_algos = [
+            {
+                'name': a.name,
+                'version': a.version,
+                'label': a.label,
+                'category': a.category,
+                'type': a.algo_type,
+                'description': a.description,
+                'paramsSchema': a.params_schema,
+                'outputSchema': a.output_schema,
+                'isRemote': False,
+                'endpoint': f"{slug_base}/{slug_map.get(a.name, a.name.split('-')[0])}/execute",
+            }
+            for a in self._algorithms.values()
+        ]
+        remote_algos = [
+            {
+                'name': a.name,
+                'version': a.version,
+                'label': a.label,
+                'category': a.category,
+                'type': a.algo_type,
+                'description': a.description,
+                'paramsSchema': a.params_schema,
+                'outputSchema': a.output_schema,
+                'isRemote': True,
+                'endpoint': a.endpoint,
+            }
+            for a in self._remote_algorithms.values()
+        ]
+        return local_algos + remote_algos
+
     def get_by_category(self, category: str,
                         algo_type: Optional[str] = None) -> List[AlgorithmBase]:
-        """按一级分类（和可选的二级分类）过滤"""
         result = [a for a in self._algorithms.values() if a.category == category]
         if algo_type:
             result = [a for a in result if a.algo_type == algo_type]
         return result
 
     def get_category_tree(self) -> List[Dict]:
-        """返回两级分类树，包含每个叶节点的算法数量"""
         tree: Dict[str, Dict] = {}
-        for algo in self._algorithms.values():
-            cat = algo.category
-            typ = algo.algo_type
+        all_algos = self.get_all_algorithms()
+
+        for algo in all_algos:
+            cat = algo.get('category', '')
+            typ = algo.get('type', '')
+
             if cat not in tree:
                 tree[cat] = {
                     'category': cat,
@@ -82,7 +128,6 @@ class RegistryService:
                 }
             types[typ]['count'] += 1
 
-        # 转成列表格式
         return [
             {
                 'category': v['category'],
@@ -94,12 +139,12 @@ class RegistryService:
 
     def get_metadata(self) -> List[AlgorithmInfo]:
         slug_base = f'http://localhost:{settings.ALGORITHM_PORT}'
-        return [
+        local_metadata = [
             AlgorithmInfo(
                 name=algo.name,
                 version=algo.version,
                 endpoint=f'{slug_base}/{_NAME_TO_SLUG.get(algo.name, algo.name.split("-")[0])}',
-                supported_params='',          # 已废弃，保留字段兼容旧调用
+                supported_params='',
                 description=algo.description,
                 category=algo.category,
                 algo_type=algo.algo_type,
@@ -109,6 +154,11 @@ class RegistryService:
             )
             for algo in self._algorithms.values()
         ]
+        return local_metadata + list(self._remote_algorithms.values())
+
+    def sync_remote_algorithms(self, remote_algos: List[AlgorithmInfo]) -> None:
+        for algo in remote_algos:
+            self._remote_algorithms[algo.name] = algo
 
 
 registry_service = RegistryService()

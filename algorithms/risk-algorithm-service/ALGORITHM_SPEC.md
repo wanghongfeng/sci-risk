@@ -11,7 +11,11 @@
 - [3. 算法基类](#3-算法基类)
 - [4. 请求响应格式](#4-请求响应格式)
 - [5. 回调协议](#5-回调协议)
-- [6. 注册到后端](#6-注册到后端)
+- [6. 算法注册中心](#6-算法注册中心)
+- [7. 远程算法服务](#7-远程算法服务)
+- [8. 横向扩展](#8-横向扩展)
+- [9. 错误处理](#9-错误处理)
+- [10. 安全建议](#10-安全建议)
 
 ---
 
@@ -39,15 +43,16 @@ algorithm-service/
 │   └── entities.py          # 数据实体
 ├── services/
 │   ├── __init__.py
-│   ├── registry_service.py  # 算法注册服务
-│   └── algorithm_service.py # 算法执行服务
+│   ├── registry_service.py  # 算法注册服务（统一注册中心）
+│   ├── algorithm_service.py # 算法执行服务
+│   └── discovery_service.py # 算法发现服务（自动发现本地/远程）
 ├── controllers/
 │   ├── __init__.py
 │   └── api_controller.py    # API控制器
 ├── utils/
 │   ├── __init__.py
 │   └── http_client.py       # HTTP客户端
-├── algorithms/               # 算法实现目录
+├── algorithms/               # 算法实现目录（自动发现）
 │   ├── __init__.py
 │   └── your_algorithm.py    # 你的算法实现
 ├── main.py                   # 入口文件
@@ -60,6 +65,7 @@ algorithm-service/
 # 设置环境变量
 export BACKEND_URL=http://localhost:8080
 export ALGORITHM_PORT=5000
+export REMOTE_ALGORITHM_SERVICES=risk-ml-algorithm:http://localhost:5001
 
 # 安装依赖
 pip install -r requirements.txt
@@ -83,6 +89,9 @@ python main.py
 | 健康检查 | GET | `/health` | 服务健康状态 |
 | 算法执行 | POST | `/{algorithm_name}/execute` | 执行具体算法 |
 | 算法列表 | GET | `/algorithms` | 获取所有算法列表 |
+| 分类树 | GET | `/categories` | 获取分类层级结构 |
+| 远程服务管理 | GET/POST | `/remote-services` | 管理远程算法服务 |
+| 统一执行 | POST | `/algorithm/execute` | 统一执行入口（自动路由） |
 
 ### 2.2 健康检查接口
 
@@ -95,27 +104,71 @@ GET /health
 ```json
 {
   "status": "healthy",
-  "service": "multi-algorithm-service",
-  "version": "1.0.0",
+  "service": "algorithm-registry-center",
+  "version": "2.0.0",
   "port": 5000,
   "algorithms": [
     "tariff-risk-algorithm",
     "risk-scenarios-algorithm"
+  ],
+  "remoteAlgorithms": [
+    "ml-risk-prediction",
+    "ml-demand-forecast"
   ]
 }
 ```
 
-### 2.3 算法执行接口
+### 2.3 算法列表接口
 
 **请求**
 ```
-POST /{algorithm_name}/execute
+GET /algorithms?includeRemote=true&category=risk&type=simulation
+```
+
+**响应**
+```json
+{
+  "algorithms": [
+    {
+      "name": "tariff-risk-algorithm",
+      "version": "1.0.0",
+      "label": "关税风险模拟",
+      "category": "risk",
+      "type": "simulation",
+      "description": "关税风险模拟算法",
+      "isRemote": false,
+      "paramsSchema": {...},
+      "outputSchema": {...}
+    },
+    {
+      "name": "ml-risk-prediction",
+      "version": "1.0.0",
+      "label": "ML风险预测",
+      "category": "risk",
+      "type": "classification",
+      "description": "基于机器学习的风险预测",
+      "isRemote": true,
+      "endpoint": "http://localhost:5001/algorithm/execute"
+    }
+  ]
+}
+```
+
+### 2.4 统一算法执行接口
+
+**请求**
+```
+POST /algorithm/execute
 Content-Type: application/json
 
 {
-  "taskId": "可选，不提供则自动生成",
+  "algorithmName": "ml-risk-prediction",
+  "taskId": "optional-task-id",
   "callbackUrl": "http://localhost:8080/api/simulation/status",
-  ...其他算法特定参数
+  "params": {
+    "productId": "P001",
+    "region": "APAC"
+  }
 }
 ```
 
@@ -124,13 +177,6 @@ Content-Type: application/json
 {
   "taskId": "550e8400-e29b-41d4-a716-446655440000",
   "status": "STARTED"
-}
-```
-
-**响应 (404 Not Found)**
-```json
-{
-  "error": "Algorithm tariff not found"
 }
 ```
 
@@ -144,7 +190,7 @@ Content-Type: application/json
 
 ```python
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any
+from typing import Dict, Any
 
 class AlgorithmBase(ABC):
     @property
@@ -167,23 +213,29 @@ class AlgorithmBase(ABC):
 
     @property
     @abstractmethod
-    def supported_params(self) -> List[str]:
-        """支持的参数列表"""
+    def category(self) -> str:
+        """一级分类: risk / plan / inventory / supply_chain"""
         pass
 
+    @property
     @abstractmethod
-    def execute(self, params: Dict[str, Any], task_id: str, callback_url: str) -> Dict[str, Any]:
-        """
-        执行算法
+    def algo_type(self) -> str:
+        """二级分类: simulation / classification / assessment / ..."""
+        pass
 
-        Args:
-            params: 执行参数 (字典)
-            task_id: 任务ID
-            callback_url: 状态回调URL
+    @property
+    def params_schema(self) -> Dict:
+        """输入参数 JSON Schema"""
+        return {"type": "object", "properties": {}}
 
-        Returns:
-            执行结果字典
-        """
+    @property
+    def output_schema(self) -> Dict:
+        """输出结果 JSON Schema"""
+        return {"type": "object", "properties": {}}
+
+    @abstractmethod
+    def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """算法核心逻辑"""
         pass
 ```
 
@@ -191,7 +243,7 @@ class AlgorithmBase(ABC):
 
 ```python
 from models.base import AlgorithmBase
-from typing import Dict, Any, List
+from typing import Dict, Any
 
 class MyAlgorithm(AlgorithmBase):
     @property
@@ -207,29 +259,37 @@ class MyAlgorithm(AlgorithmBase):
         return "我的算法"
 
     @property
-    def supported_params(self) -> List[str]:
-        return ["param1", "param2"]
+    def category(self) -> str:
+        return "risk"
 
-    def execute(self, params: Dict[str, Any], task_id: str, callback_url: str) -> Dict[str, Any]:
-        # 算法逻辑
+    @property
+    def algo_type(self) -> str:
+        return "simulation"
+
+    @property
+    def params_schema(self) -> Dict:
         return {
-            'taskId': task_id,
-            'result': '执行完成',
-            'data': {}
+            "type": "object",
+            "required": ["param1"],
+            "properties": {
+                "param1": {"type": "string", "description": "参数1"}
+            }
         }
+
+    def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        return {'result': '执行完成', 'data': params}
 ```
 
-### 3.3 注册算法
+### 3.3 自动注册
 
-在 `main.py` 中注册算法：
+算法只需放在 `algorithms/` 目录下，服务启动时会自动发现并注册：
 
-```python
-from algorithms import MyAlgorithm
-
-def create_app():
-    app = Flask(__name__)
-    registry_service.register(MyAlgorithm())
-    # ...
+```
+algorithms/
+├── __init__.py
+├── tariff_algorithm.py      # 自动发现
+├── scenario_algorithm.py    # 自动发现
+└── your_algorithm.py        # 自动发现
 ```
 
 ---
@@ -359,36 +419,184 @@ Content-Type: application/json
 
 ---
 
-## 6. 注册到后端
+## 6. 算法注册中心
 
-### 6.1 注册接口
+### 6.1 架构概述
 
-启动时自动向控制塔后端注册：
+`risk-algorithm-service` 作为算法注册中心，支持：
+- **本地算法自动发现**：扫描 `algorithms/` 目录自动注册
+- **远程算法服务代理**：发现并代理调用其他算法服务（如 `risk-ml-algorithm`）
+- **统一执行入口**：`/algorithm/execute` 自动路由到本地或远程算法
+- **后端直连模式**：后端 Java 服务通过注册中心同步算法元数据，直接调用算法执行端点
+
+### 6.2 架构图
 
 ```
-POST http://localhost:8080/api/algorithm/register
-Content-Type: application/json
-
-{
-  "name": "my-algorithm",
-  "version": "1.0.0",
-  "endpoint": "http://localhost:5000/my",
-  "supportedParams": "param1,param2",
-  "description": "我的算法"
-}
+┌─────────────────────────────────────────────────────────────────────────┐
+│                           供应链控制塔系统                                │
+│                                                                         │
+│  ┌──────────────┐    ┌──────────────────┐    ┌─────────────────────────┐ │
+│  │    前端      │───▶│  后端 Java       │───▶│  算法注册中心            │ │
+│  │  (Vue)      │    │  (risk-basic)    │    │  (risk-algorithm-svc)   │ │
+│  │             │    │                  │    │  端口: 5000              │ │
+│  │             │◀───│  同步算法列表     │◀───│  • 本地算法自动发现      │ │
+│  │             │    │  每60秒刷新       │    │  • 远程算法代理          │ │
+│  └──────────────┘    └──────────────────┘    └───────────┬─────────────┘ │
+│                                                          │               │
+│                                    ┌─────────────────────┼─────────────┐ │
+│                                    │                     │             │ │
+│                                    ▼                     ▼             │ │
+│                         ┌──────────────────┐   ┌────────────────────┐  │ │
+│                         │   本地算法        │   │   远程算法服务       │  │ │
+│                         │  • tariff-risk   │   │  risk-ml-algorithm │  │ │
+│                         │  • risk-scenarios│   │  端口: 5001        │  │ │
+│                         └──────────────────┘   └─────────┬──────────┘  │ │
+│                                                         │              │ │
+│                                    ┌────────────────────┴───────────┐   │ │
+│                                    │  回调 (callbackUrl)              │   │ │
+│                                    │  POST /api/simulation/status    │   │ │
+│                                    │  POST /api/simulation/result   │   │ │
+│                                    └────────────────────────────────┘   │ │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 6.2 注册时机
+### 6.3 核心服务
 
-- 服务启动时注册
-- 建议添加重试机制
-- 注册失败不影响本地服务运行
+#### DiscoveryService（发现服务）
+
+```python
+class AlgorithmDiscoveryService:
+    def discover_local_algorithms(self, package_name: str = "algorithms") -> List[AlgorithmBase]:
+        """自动发现本地 algorithms/ 目录下的算法"""
+
+    def register_remote_service(self, name: str, base_url: str, ...) -> None:
+        """注册远程算法服务"""
+
+    def discover_remote_algorithms(self, force_refresh: bool = False) -> List[AlgorithmInfo]:
+        """从远程服务获取算法列表（缓存5分钟）"""
+
+    def execute_remote_algorithm(self, algorithm_name: str, params: Dict) -> Dict:
+        """代理执行远程算法，保持 callbackUrl 透传"""
+```
+
+#### RegistryService（注册服务）
+
+```python
+class RegistryService:
+    def register(self, algorithm: AlgorithmBase) -> None:
+        """注册本地算法"""
+
+    def register_remote(self, algorithm_info: AlgorithmInfo) -> None:
+        """注册远程算法元数据"""
+
+    def get(self, name: str) -> Optional[AlgorithmBase]:
+        """获取本地算法"""
+
+    def get_remote(self, name: str) -> Optional[AlgorithmInfo]:
+        """获取远程算法信息"""
+
+    def get_all_algorithms(self) -> List[Dict]:
+        """获取所有算法（含本地和远程）"""
+```
+
+### 6.4 后端集成流程
+
+后端 Java 服务通过以下方式与算法注册中心集成：
+
+1. **启动时同步**：后端启动时从注册中心获取算法列表
+2. **定时刷新**：每60秒自动同步算法列表和分类树
+3. **统一执行**：后端直接调用算法注册中心提供的执行端点
+
+```java
+// 后端配置 (application.properties)
+app.algorithm.registry-url=http://localhost:5000
+app.algorithm.sync-interval=60000
+```
+
+后端通过 `SimulationController.executeAlgorithm()` 统一入口，查询注册中心获取算法端点，然后直接调用执行。
 
 ---
 
-## 7. 横向扩展
+## 7. 远程算法服务
 
-### 7.1 多实例部署
+### 7.1 注册远程服务
+
+#### 通过环境变量配置
+
+```bash
+export REMOTE_ALGORITHM_SERVICES=risk-ml-algorithm:http://localhost:5001,other-service:http://localhost:5002
+```
+
+多个服务用逗号分隔，格式：`服务名:URL`
+
+#### 通过 API 动态添加
+
+```bash
+POST /remote-services
+Content-Type: application/json
+
+{
+  "name": "risk-ml-algorithm",
+  "baseUrl": "http://localhost:5001",
+  "algorithmsEndpoint": "/algorithms",
+  "executeEndpoint": "/algorithm/execute"
+}
+```
+
+### 7.2 远程服务要求
+
+远程算法服务需要提供以下接口：
+
+| 接口 | 方法 | 路径 | 说明 |
+|-----|------|------|------|
+| 健康检查 | GET | `/health` | 服务健康状态 |
+| 算法列表 | GET | `/algorithms` | 获取算法元数据 |
+| 算法执行 | POST | `/algorithm/execute` | 执行算法 |
+
+### 7.3 远程服务示例 (risk-ml-algorithm)
+
+```python
+# risk-ml-algorithm/main.py
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
+
+@app.route('/health')
+def health():
+    return jsonify({'status': 'healthy'})
+
+@app.route('/algorithms')
+def list_algorithms():
+    return jsonify({
+        'algorithms': [
+            {
+                'name': 'ml-risk-prediction',
+                'version': '1.0.0',
+                'description': 'ML风险预测',
+                'category': 'risk',
+                'type': 'classification',
+                'label': 'ML风险预测',
+                'paramsSchema': {...},
+                'outputSchema': {...}
+            }
+        ]
+    })
+
+@app.route('/algorithm/execute', methods=['POST'])
+def execute():
+    data = request.get_json()
+    # 执行ML算法
+    return jsonify({'taskId': data.get('taskId'), 'status': 'COMPLETED', 'result': {...}})
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5001)
+```
+
+---
+
+## 8. 横向扩展
+
+### 8.1 多实例部署
 
 ```
                     ┌─────────────────┐
@@ -405,7 +613,7 @@ Content-Type: application/json
 └─────────────────┘ └─────────────────┘ └─────────────────┘
 ```
 
-### 7.2 端口配置
+### 8.2 端口配置
 
 ```bash
 # 实例1
@@ -417,13 +625,11 @@ export ALGORITHM_PORT=5002
 python main.py
 ```
 
-每个实例启动后会自动注册到后端，后端会根据负载情况选择调用。
-
 ---
 
-## 8. 错误处理
+## 9. 错误处理
 
-### 8.1 错误响应格式
+### 9.1 错误响应格式
 
 ```json
 {
@@ -433,7 +639,7 @@ python main.py
 }
 ```
 
-### 8.2 错误码
+### 9.2 错误码
 
 | 错误码 | HTTP状态 | 说明 |
 |-------|---------|------|
@@ -442,18 +648,20 @@ python main.py
 | INVALID_PARAMS | 400 | 参数无效 |
 | EXECUTION_ERROR | 500 | 算法执行错误 |
 | CALLBACK_FAILED | 500 | 回调后端失败 |
+| REMOTE_SERVICE_UNAVAILABLE | 503 | 远程服务不可用 |
 
 ---
 
-## 9. 安全建议
+## 10. 安全建议
 
 1. **回调URL验证**: 生产环境应验证回调URL来源
 2. **参数校验**: 严格校验输入参数
 3. **超时控制**: 设置合理的执行超时时间
 4. **日志记录**: 记录完整的执行日志
+5. **远程服务认证**: 远程服务间通信建议使用API Key或JWT认证
 
 ---
 
-## 10. 联系支持
+## 11. 联系支持
 
 如有问题，请联系：algorithm@example.com
