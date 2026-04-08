@@ -5,13 +5,13 @@
 -- =====================================================
 
 -- 1. 工厂主数据 (3条记录)
-INSERT INTO factory_master (factory_id, factory_name, country, capacity, main_markets, established_date, status, last_updated) VALUES
+INSERT INTO sci_dw.factory_master (factory_id, factory_name, country, capacity, main_markets, established_date, status, last_updated) VALUES
 ('F001', '海尔青岛工厂', '中国', 500000, '中国, 亚洲, 欧洲', '2000-01-01', '运行中', '2026-04-02 09:00:40'),
 ('F002', '海尔越南工厂', '越南', 200000, '东南亚, 北美', '2010-05-01', '运行中', '2026-04-02 09:00:40'),
 ('F003', '海尔德国工厂', '德国', 150000, '欧洲, 中东', '2015-03-01', '运行中', '2026-04-02 09:00:40');
 
 -- 2. 供应商主数据 (5条记录)
-INSERT INTO supplier_master (supplier_id, supplier_name, country, tier, supplier_type, established_date, credit_rating, last_updated) VALUES
+INSERT INTO sci_dw.supplier_master (supplier_id, supplier_name, country, tier, supplier_type, established_date, credit_rating, last_updated) VALUES
 ('S001', '海尔压缩机供应商', '中国', 1, '核心供应商', '1995-01-01', 'AAA', '2026-04-02 09:00:40'),
 ('S002', '海尔冷凝器供应商', '中国', 1, '核心供应商', '1998-05-01', 'AA', '2026-04-02 09:00:40'),
 ('S003', '海尔控制器供应商', '韩国', 1, '核心供应商', '2000-03-01', 'AA', '2026-04-02 09:00:40'),
@@ -19,7 +19,7 @@ INSERT INTO supplier_master (supplier_id, supplier_name, country, tier, supplier
 ('S005', '海尔包装供应商', '中国', 3, '一般供应商', '2010-01-01', 'B', '2026-04-02 09:00:40');
 
 -- 3. 产品主数据 (5条记录)
-INSERT INTO product_master (product_id, product_name, factory_id, target_markets, base_price, product_type, launch_date) VALUES
+INSERT INTO sci_dw.product_master (product_id, product_name, factory_id, target_markets, base_price, product_type, launch_date) VALUES
 ('P001', 'HRF-500', 'F001', '中国, 欧洲, 北美', 4999.00, '高端冰箱', '2023-01-01'),
 ('P002', 'HRF-450', 'F001', '中国, 亚洲', 3999.00, '中高端冰箱', '2022-06-01'),
 ('P003', 'HRF-380', 'F002', '东南亚, 南美', 2999.00, '中端冰箱', '2022-03-01'),
@@ -27,7 +27,7 @@ INSERT INTO product_master (product_id, product_name, factory_id, target_markets
 ('P005', 'HRF-550', 'F003', '欧洲, 中东', 5999.00, '旗舰冰箱', '2023-06-01');
 
 -- 4. BOM主数据 (10条记录)
-INSERT INTO bom_master (bom_id, product_id, key_component_id, key_component_name, quantity, price, supplier_id) VALUES
+INSERT INTO sci_dw.bom_master (bom_id, product_id, key_component_id, key_component_name, quantity, price, supplier_id) VALUES
 ('B001', 'P001', 'C001', '变频压缩机', 1, 800.00, 'S001'),
 ('B002', 'P001', 'C002', '高效冷凝器', 1, 300.00, 'S002'),
 ('B003', 'P001', 'C003', '智能控制器', 1, 200.00, 'S003'),
@@ -40,7 +40,7 @@ INSERT INTO bom_master (bom_id, product_id, key_component_id, key_component_name
 ('B010', 'P005', 'C003', '高级智能控制器', 1, 300.00, 'S003');
 
 -- 5. 供应路径数据 (9条记录)
-INSERT INTO supply_path (path_id, key_component_id, supplier_id, supply_country, factory_id, path_type, lead_time, transportation_mode) VALUES
+INSERT INTO sci_dw.supply_path (path_id, key_component_id, supplier_id, supply_country, factory_id, path_type, lead_time, transportation_mode) VALUES
 ('SP001', 'C001', 'S001', '中国', 'F001', '直接供应', 5, '公路'),
 ('SP002', 'C001', 'S001', '中国', 'F002', '直接供应', 7, '海运'),
 ('SP003', 'C001', 'S001', '中国', 'F003', '直接供应', 10, '海运+公路'),
@@ -52,7 +52,7 @@ INSERT INTO supply_path (path_id, key_component_id, supplier_id, supply_country,
 ('SP009', 'C004', 'S004', '日本', 'F003', '直接供应', 11, '海运+公路');
 
 -- 6. 关税规则数据 (10条记录)
-INSERT INTO tariff_rule (tariff_id, origin_country, destination_country, product_type, current_tariff, future_tariff, effective_date, expiry_date, rule_status, last_updated) VALUES
+INSERT INTO sci_dw.tariff_rule (tariff_id, origin_country, destination_country, product_type, current_tariff, future_tariff, effective_date, expiry_date, rule_status, last_updated) VALUES
 ('T001', '中国', '美国', '高端冰箱', 25.00, 30.00, '2026-04-03', '2027-12-31', '有效', '2026-04-02 09:07:15'),
 ('T002', '中国', '美国', '中高端冰箱', 25.00, 30.00, '2026-04-03', '2027-12-31', '有效', '2026-04-02 09:07:15'),
 ('T003', '中国', '美国', '中端冰箱', 20.00, 25.00, '2026-04-03', '2027-12-31', '有效', '2026-04-02 09:07:15'),
@@ -65,7 +65,7 @@ INSERT INTO tariff_rule (tariff_id, origin_country, destination_country, product
 ('T019', '德国', '美国', '中高端冰箱', 2.50, 2.00, '2026-04-03', '2027-12-31', '有效', '2026-04-02 09:07:15');
 
 -- 7. 销售订单数据 (10条记录)
-INSERT INTO sales_order (order_id, product_id, quantity, sales_country, price, order_date, delivery_date, status) VALUES
+INSERT INTO sci_dw.sales_order (order_id, product_id, quantity, sales_country, price, order_date, delivery_date, status) VALUES
 ('SO001', 'P001', 100, '中国', 4999.00, '2023-01-15', '2023-01-20', '已完成'),
 ('SO002', 'P001', 50, '德国', 5999.00, '2023-01-20', '2023-02-05', '已完成'),
 ('SO003', 'P002', 200, '中国', 3999.00, '2023-02-01', '2023-02-06', '已完成'),
@@ -78,7 +78,7 @@ INSERT INTO sales_order (order_id, product_id, quantity, sales_country, price, o
 ('SO010', 'P001', 60, '英国', 5799.00, '2023-04-01', '2023-04-15', '处理中');
 
 -- 8. 风险映射数据 (29条记录)
-INSERT INTO risk_mapping (path_id, product_id, factory_id, supplier_id, origin_country, destination_country, current_tariff, tariff_risk_level, product_risk_level, factory_risk_level, overall_risk_level, risk_score, assessment_date) VALUES
+INSERT INTO sci_dw.risk_mapping (path_id, product_id, factory_id, supplier_id, origin_country, destination_country, current_tariff, tariff_risk_level, product_risk_level, factory_risk_level, overall_risk_level, risk_score, assessment_date) VALUES
 ('SP001', 'P002', 'F001', 'S001', '中国', '中国', NULL, '中', '中', '中', '中', 40, '2026-04-02 13:32:43'),
 ('SP001', 'P001', 'F001', 'S001', '中国', '英国', NULL, '中', '中', '中', '中', 40, '2026-04-02 13:32:43'),
 ('SP001', 'P001', 'F001', 'S001', '中国', '美国', 25.00, '高', '高', '高', '高', 100, '2026-04-02 13:32:43'),
@@ -110,7 +110,7 @@ INSERT INTO risk_mapping (path_id, product_id, factory_id, supplier_id, origin_c
 ('SP009', 'P005', 'F003', 'S004', '德国', '法国', NULL, '中', '高', '中', '高', 50, '2026-04-02 13:32:43');
 
 -- 9. 用户数据 (7条记录)
-INSERT INTO users (name, photo, status, created_at, password_hash, role) VALUES
+INSERT INTO sci_dw.users (name, photo, status, created_at, password_hash, role) VALUES
 ('Jerry-供应链专家', '1_jerry.jpg', 'active', '2026-03-31 05:24:38', '', 'viewer'),
 ('Tom-技术架构师', 'tom.jpg', 'active', '2026-03-31 05:24:38', '', 'viewer'),
 ('admin', 'admin.png', 'active', '2026-03-31 08:45:28', '$2b$12$plGLBEg27UxkNSMYG1XE2.C5J8EEDND5y7el/ApgpInzFQMIrwgPe', 'admin'),
@@ -119,7 +119,7 @@ INSERT INTO users (name, photo, status, created_at, password_hash, role) VALUES
 ('test_viewer_pytest', 'test.png', 'active', '2026-03-31 09:08:05', '$2b$12$YFgUMi8IVZUHz12gwYT8keiuJ5sZf6jsIU6hGd54xB7GKORZ.J3im', 'viewer');
 
 -- 10. 菜单数据 (6条记录)
-INSERT INTO menu (menu_id, menu_name, menu_code, parent_id, route_path, icon, sort_order, is_visible, permission, component) VALUES
+INSERT INTO sci_dw.menu (menu_id, menu_name, menu_code, parent_id, route_path, icon, sort_order, is_visible, permission, component) VALUES
 ('M001', '首页', 'dashboard', '0', '/dashboard', 'Dashboard', 1, TRUE, 'dashboard:view', 'Dashboard'),
 ('M002', '关税管理', 'tariff', '0', '/tariff', 'TariffIcon', 2, TRUE, 'tariff:manage', 'TariffLayout'),
 ('M203', '关税模拟', 'tariff-sim', 'M002', '/tariff/simulation', NULL, 3, TRUE, 'tariff:sim', 'TariffSimulation'),
