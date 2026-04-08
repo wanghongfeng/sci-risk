@@ -7,7 +7,8 @@
 3. [表清单统计](#3-表清单统计)
 4. [文件结构](#4-文件结构)
 5. [快速开始](#5-快速开始)
-6. [更新记录](#6-更新记录)
+6. [账号权限说明](#6-账号权限说明)
+7. [更新记录](#7-更新记录)
 
 ***
 
@@ -317,15 +318,58 @@ SELECT COUNT(*) as table_count FROM sci_dw.factory_master;
 
 ***
 
-## 6. 更新记录
+## 6. 账号权限说明
 
-| 日期时间          | 说明         | 修改者         |
-|---------------| ---------- | ------------ |
-| 2026-04-08 00:00 | 初始化SCI数据仓库分层架构 | Lenovo SCI团队 |
-| 2026-04-08 02:30 | seed_data.sql所有INSERT语句添加sci_dw.前缀 | Lenovo SCI团队 |
+数据库角色分为三类：viewer（只读）、developer（开发）、application（应用服务）。
+
+### 6.1 角色说明
+
+| 角色 | 用途 | 密码配置 |
+| ---- | ---- | -------- |
+| sci_db_viewer | 数据分析报表，只读访问 | viewer_password |
+| sci_db_developer | 数据库开发维护，完全访问 | developer_password |
+| sci_app_service | 应用运行时连接账户 | app_password |
+
+**注意：** 生产环境请务必修改默认密码。
+
+### 6.2 Schema 权限矩阵
+
+| Schema | sci_db_viewer | sci_db_developer | sci_app_service |
+| ------ | ------------- | ---------------- | ---------------- |
+| SCI_IDL | SELECT | ALL PRIVILEGES | SELECT, INSERT, UPDATE, DELETE |
+| SCI_ODS | SELECT | ALL PRIVILEGES | SELECT, INSERT, UPDATE, DELETE |
+| SCI_DW | SELECT | ALL PRIVILEGES | SELECT, INSERT, UPDATE, DELETE |
+| SCI_TMP | 无访问 | ALL PRIVILEGES | SELECT, INSERT, UPDATE, DELETE |
+| SCI_ADS | SELECT | ALL PRIVILEGES | SELECT, INSERT, UPDATE, DELETE |
+| SCI_APP | SELECT | ALL PRIVILEGES | **ALL PRIVILEGES** |
+
+### 6.3 权限说明
+
+| 权限类型 | 说明 |
+| -------- | ---- |
+| USAGE | 允许使用 schema |
+| SELECT | 读取数据 |
+| INSERT | 插入数据 |
+| UPDATE | 更新数据 |
+| DELETE | 删除数据 |
+| ALL PRIVILEGES | 完全控制（包括 DDL） |
+
+### 6.4 SCI_APP 特殊说明
+
+SCI_APP schema 存放应用系统表（用户、菜单、角色等），应用服务账户（sci_app_service）对其拥有完全控制权限，以支持应用运行时动态管理用户权限和系统配置。
 
 ***
 
-**文档版本:** 1.0
+## 7. 更新记录
+
+| 日期时间          | 说明         | 修改者         |
+|---------------| ---------- | ------------ |
+| 2026-04-08 00:00 | 初始化SCI数据仓库分层架构 | SCI Team |
+| 2026-04-08 02:30 | seed_data.sql所有INSERT语句添加sci_dw.前缀 | SCI Team |
+| 2026-04-08 03:00 | 添加SCI_APP schema及完整权限配置，添加账号权限说明章节 | SCI Team |
+
+***
+
+**文档版本:** 1.1
 **维护团队:** SCI Team
 **最后更新:** 2026-04-08
