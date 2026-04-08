@@ -327,5 +327,5 @@ SELECT COUNT(*) as table_count FROM sci_dw.factory_master;
 ***
 
 **文档版本:** 1.0
-**维护团队:** Lenovo SCI Team
+**维护团队:** SCI Team
 **最后更新:** 2026-04-08
