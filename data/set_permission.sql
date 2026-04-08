@@ -8,13 +8,13 @@
 -- ============================================
 
 -- Database Viewer Role (Read-only access)
-CREATE ROLE IF NOT EXISTS sci_db_viewer WITH LOGIN PASSWORD 'viewer_password';
+CREATE ROLE  sci_db_viewer WITH LOGIN PASSWORD 'viewer_password';
 
 -- Database Developer Role (Read/Write/DDL access)
-CREATE ROLE IF NOT EXISTS sci_db_developer WITH LOGIN PASSWORD 'developer_password';
+CREATE ROLE  sci_db_developer WITH LOGIN PASSWORD 'developer_password';
 
 -- Application Service Account Role
-CREATE ROLE IF NOT EXISTS sci_app_service WITH LOGIN PASSWORD 'app_password';
+CREATE ROLE  sci_app_service WITH LOGIN PASSWORD 'app_password';
 
 -- ============================================
 -- SCHEMA PERMISSIONS - SCI_IDL
@@ -106,6 +106,24 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA SCI_ADS TO sci_app_
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA SCI_ADS TO sci_app_service;
 
 -- ============================================
+-- SCHEMA PERMISSIONS - SCI_APP
+-- ============================================
+
+-- Viewer: SELECT on all tables
+GRANT USAGE ON SCHEMA SCI_APP TO sci_db_viewer;
+GRANT SELECT ON ALL TABLES IN SCHEMA SCI_APP TO sci_db_viewer;
+
+-- Developer: Full access
+GRANT USAGE ON SCHEMA SCI_APP TO sci_db_developer;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA SCI_APP TO sci_db_developer;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA SCI_APP TO sci_db_developer;
+
+-- Application: ALL privileges (full access for application service)
+GRANT ALL PRIVILEGES ON SCHEMA SCI_APP TO sci_app_service;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA SCI_APP TO sci_app_service;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA SCI_APP TO sci_app_service;
+
+-- ============================================
 -- DEFAULT PRIVILEGES FOR FUTURE OBJECTS
 -- ============================================
 
@@ -125,6 +143,9 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA SCI_TMP GRANT ALL ON SEQUENCES TO sci_db_deve
 ALTER DEFAULT PRIVILEGES IN SCHEMA SCI_ADS GRANT ALL ON TABLES TO sci_db_developer;
 ALTER DEFAULT PRIVILEGES IN SCHEMA SCI_ADS GRANT ALL ON SEQUENCES TO sci_db_developer;
 
+ALTER DEFAULT PRIVILEGES IN SCHEMA SCI_APP GRANT ALL ON TABLES TO sci_db_developer;
+ALTER DEFAULT PRIVILEGES IN SCHEMA SCI_APP GRANT ALL ON SEQUENCES TO sci_db_developer;
+
 -- Set default privileges for app service
 ALTER DEFAULT PRIVILEGES IN SCHEMA SCI_IDL GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO sci_app_service;
 ALTER DEFAULT PRIVILEGES IN SCHEMA SCI_IDL GRANT USAGE, SELECT ON SEQUENCES TO sci_app_service;
@@ -137,6 +158,9 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA SCI_DW GRANT USAGE, SELECT ON SEQUENCES TO sc
 
 ALTER DEFAULT PRIVILEGES IN SCHEMA SCI_ADS GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO sci_app_service;
 ALTER DEFAULT PRIVILEGES IN SCHEMA SCI_ADS GRANT USAGE, SELECT ON SEQUENCES TO sci_app_service;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA SCI_APP GRANT ALL ON TABLES TO sci_app_service;
+ALTER DEFAULT PRIVILEGES IN SCHEMA SCI_APP GRANT ALL ON SEQUENCES TO sci_app_service;
 
 -- ============================================
 -- ROLE DESCRIPTIONS
