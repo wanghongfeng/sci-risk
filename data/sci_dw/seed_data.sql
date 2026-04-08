@@ -109,23 +109,6 @@ INSERT INTO sci_dw.risk_mapping (path_id, product_id, factory_id, supplier_id, o
 ('SP008', 'P001', 'F001', 'S004', '中国', '中国', NULL, '中', '中', '中', '中', 40, '2026-04-02 13:32:43'),
 ('SP009', 'P005', 'F003', 'S004', '德国', '法国', NULL, '中', '高', '中', '高', 50, '2026-04-02 13:32:43');
 
--- 9. 用户数据 (7条记录)
-INSERT INTO sci_dw.users (name, photo, status, created_at, password_hash, role) VALUES
-('Jerry-供应链专家', '1_jerry.jpg', 'active', '2026-03-31 05:24:38', '', 'viewer'),
-('Tom-技术架构师', 'tom.jpg', 'active', '2026-03-31 05:24:38', '', 'viewer'),
-('admin', 'admin.png', 'active', '2026-03-31 08:45:28', '$2b$12$plGLBEg27UxkNSMYG1XE2.C5J8EEDND5y7el/ApgpInzFQMIrwgPe', 'admin'),
-('test_viewer_pytest', 'test.png', 'active', '2026-03-31 08:47:55', '$2b$12$uoqmWOCJNTn3asbdwAgKdeB.skCOe8SGUK8RYDCLDzSxaDU6qPYUW', 'viewer'),
-('hellohello', '123919', 'active', '2026-03-31 09:00:32', '$2b$12$8MI/Vxkjj78M1v4ToXdvfOHcHwrmOa.mqoamQbY76FqVifEjdeh7m', 'viewer'),
-('test_viewer_pytest', 'test.png', 'active', '2026-03-31 09:08:05', '$2b$12$YFgUMi8IVZUHz12gwYT8keiuJ5sZf6jsIU6hGd54xB7GKORZ.J3im', 'viewer');
-
--- 10. 菜单数据 (6条记录)
-INSERT INTO sci_dw.menu (menu_id, menu_name, menu_code, parent_id, route_path, icon, sort_order, is_visible, permission, component) VALUES
-('M001', '首页', 'dashboard', '0', '/dashboard', 'Dashboard', 1, TRUE, 'dashboard:view', 'Dashboard'),
-('M002', '关税管理', 'tariff', '0', '/tariff', 'TariffIcon', 2, TRUE, 'tariff:manage', 'TariffLayout'),
-('M203', '关税模拟', 'tariff-sim', 'M002', '/tariff/simulation', NULL, 3, TRUE, 'tariff:sim', 'TariffSimulation'),
-('M008', '系统设置', 'system', '0', '/system', 'SystemIcon', 8, TRUE, 'system:manage', 'SystemLayout'),
-('M804', '菜单管理', 'menu-manage', 'M008', '/system/menu', NULL, 1, TRUE, 'system:menu', 'MenuManage'),
-('M805', '算法总览', 'algorithm-overview', 'M008', '/algorithm', 'Cpu', 2, TRUE, 'algorithm:view', 'AlgorithmOverview');
 
 -- =====================================================
 -- 数据统计
