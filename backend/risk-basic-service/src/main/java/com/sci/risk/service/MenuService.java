@@ -121,6 +121,7 @@ public class MenuService {
             .peek(menu -> {
                 List<Menu> children = buildMenuTree(allMenus, menu.getMenuId());
                 if (!children.isEmpty()) {
+                    menu.setChildren(children);
                 }
             })
             .collect(Collectors.toList());

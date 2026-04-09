@@ -5,23 +5,23 @@ echo ========================================
 
 echo.
 echo [1/4] 启动后端服务 (端口 8080)...
-start "Backend Service" cmd /k "cd /d d:\12.code\test\sci\risk\backend\risk-basic-service && java -jar target\risk-basic-service-1.0.0.jar"
+start "Backend Service" cmd /k "cd /d d:\SOLO_Project\HaierRiskDemo\sci-risk\backend\risk-basic-service && D:\SOLO_Project\HaierRiskDemo\apache-maven-3.8.8\bin\mvn.cmd spring-boot:run"
 
 timeout /t 8 /nobreak >nul
 
 echo.
 echo [2/4] 启动算法服务 1 (端口 5000)...
-start "Algorithm Service 1" cmd /k "cd /d d:\12.code\test\sci\risk\algorithms\risk-algorithm-service && python main.py"
+start "Algorithm Service 1" cmd /k "cd /d d:\SOLO_Project\HaierRiskDemo\sci-risk\algorithms\risk-algorithm-service && python main.py"
 
 echo.
 echo [3/4] 启动算法服务 2 (端口 5001)...
-start "Algorithm Service 2" cmd /k "cd /d d:\12.code\test\sci\risk\algorithms\risk-ml-algorithm && python main.py"
+start "Algorithm Service 2" cmd /k "cd /d d:\SOLO_Project\HaierRiskDemo\sci-risk\algorithms\risk-ml-algorithm && python main.py"
 
 timeout /t 3 /nobreak >nul
 
 echo.
 echo [4/4] 启动前端服务 (端口 3000)...
-start "Frontend Service" cmd /k "cd /d d:\12.code\test\sci\risk\frontend && npm run dev"
+start "Frontend Service" cmd /k "cd /d d:\SOLO_Project\HaierRiskDemo\sci-risk\frontend && npm run dev"
 
 echo.
 echo ========================================

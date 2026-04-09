@@ -73,20 +73,29 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, markRaw } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { Warning, Fold, Expand, DataBoard, Money, Setting, Tools, User, Share, List } from '@element-plus/icons-vue'
+import { Warning, Fold, Expand, DataBoard, Money, Setting, Tools, User, Share, List, House, TrendCharts, Document, DataAnalysis, Histogram, Menu, Avatar, Files, Compass } from '@element-plus/icons-vue'
 import axios from 'axios'
 import config from '../config'
 
 const iconMap = {
-  'Dashboard': markRaw(DataBoard),
+  'Dashboard': markRaw(House),
   'DataBoard': markRaw(DataBoard),
   'Money': markRaw(Money),
   'Setting': markRaw(Setting),
   'Tools': markRaw(Tools),
-  'User': markRaw(User),
-  'Share': markRaw(Share),
-  'List': markRaw(List),
-  'Warning': markRaw(Warning)
+  'User': markRaw(Avatar),
+  'Share': markRaw(Files),
+  'List': markRaw(Menu),
+  'Warning': markRaw(Warning),
+  'Home': markRaw(House),
+  'TrendCharts': markRaw(TrendCharts),
+  'Document': markRaw(Document),
+  'DataAnalysis': markRaw(DataAnalysis),
+  'Histogram': markRaw(Histogram),
+  'Menu': markRaw(Menu),
+  'Avatar': markRaw(Avatar),
+  'Files': markRaw(Files),
+  'Compass': markRaw(Compass)
 }
 
 const getIcon = (iconName) => {
@@ -129,7 +138,9 @@ const buildMenuTree = (list) => {
 
 const loadMenus = async () => {
   try {
+    console.log('Trying to load menus from backend')
     const response = await axios.get(`${config.apiBaseUrl}/menu/list`)
+    console.log('Backend menu response:', response.data)
     const rawMenuList = response.data || []
 
     const mappedMenuList = rawMenuList.map(menu => ({
@@ -137,9 +148,89 @@ const loadMenus = async () => {
       icon: getIcon(menu.icon)
     }))
 
+    console.log('Mapped menu list:', mappedMenuList)
     menuList.value = buildMenuTree(mappedMenuList)
+    console.log('Built menu tree:', menuList.value)
   } catch (error) {
-    console.error('Failed to load menus:', error)
+    console.error('Failed to load menus from backend, using default menus:', error)
+    const defaultMenus = [
+      {
+        menuId: '1',
+        menuName: '仪表盘',
+        routePath: '/dashboard',
+        icon: 'Dashboard',
+        parentId: '0'
+      },
+      {
+        menuId: '2',
+        menuName: '风险分析',
+        routePath: '/risk-analysis',
+        icon: 'Warning',
+        parentId: '0'
+      },
+      {
+        menuId: '3',
+        menuName: '风险场景',
+        routePath: '/risk-scenarios',
+        icon: 'List',
+        parentId: '0'
+      },
+      {
+        menuId: '4',
+        menuName: '费率管理',
+        routePath: '/tariff-management',
+        icon: 'Money',
+        parentId: '0'
+      },
+      {
+        menuId: '5',
+        menuName: '费率模拟',
+        routePath: '/tariff-simulation',
+        icon: 'Tools',
+        parentId: '0'
+      },
+      {
+        menuId: '6',
+        menuName: '系统设置',
+        icon: 'Setting',
+        parentId: '0'
+      },
+      {
+        menuId: '6-1',
+        menuName: '用户管理',
+        routePath: '/system/user',
+        icon: 'Avatar',
+        parentId: '6'
+      },
+      {
+        menuId: '6-2',
+        menuName: '角色管理',
+        routePath: '/system/role',
+        icon: 'Share',
+        parentId: '6'
+      },
+      {
+        menuId: '6-3',
+        menuName: '菜单管理',
+        routePath: '/system/menu',
+        icon: 'List',
+        parentId: '6'
+      },
+      {
+        menuId: '7',
+        menuName: '算法概览',
+        routePath: '/algorithm-overview',
+        icon: 'Tools',
+        parentId: '0'
+      }
+    ]
+    
+    const mappedDefaultMenus = defaultMenus.map(menu => ({
+      ...menu,
+      icon: getIcon(menu.icon)
+    }))
+    
+    menuList.value = buildMenuTree(mappedDefaultMenus)
   }
 }
 

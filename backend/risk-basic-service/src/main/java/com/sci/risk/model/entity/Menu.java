@@ -1,6 +1,7 @@
 package com.sci.risk.model.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class Menu {
     private String menuId;
@@ -13,6 +14,7 @@ public class Menu {
     private Boolean isVisible;
     private String permission;
     private String component;
+    private List<Menu> children;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -56,4 +58,6 @@ public class Menu {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public List<Menu> getChildren() { return children; }
+    public void setChildren(List<Menu> children) { this.children = children; }
 }
