@@ -163,65 +163,249 @@ const loadMenus = async () => {
       },
       {
         menuId: '2',
-        menuName: '风险分析',
-        routePath: '/risk-analysis',
-        icon: 'Warning',
+        menuName: '风险感知',
+        icon: 'Compass',
         parentId: '0'
+      },
+      {
+        menuId: '2-1',
+        menuName: '全球风险数据采集',
+        routePath: '/risk/global-collection',
+        icon: 'DataAnalysis',
+        parentId: '2'
+      },
+      {
+        menuId: '2-2',
+        menuName: '风险事件库管理',
+        routePath: '/risk/event-management',
+        icon: 'Document',
+        parentId: '2'
+      },
+      {
+        menuId: '2-3',
+        menuName: '供应链网络主数据',
+        routePath: '/risk/supply-chain',
+        icon: 'Histogram',
+        parentId: '2'
+      },
+      {
+        menuId: '2-4',
+        menuName: '风险暴露地图',
+        routePath: '/risk/exposure-map',
+        icon: 'Compass',
+        parentId: '2'
+      },
+      {
+        menuId: '2-5',
+        menuName: '人工风险上报',
+        routePath: '/risk/manual-report',
+        icon: 'Document',
+        parentId: '2'
+      },
+      {
+        menuId: '2-6',
+        menuName: '数据监控与日志',
+        routePath: '/risk/monitor',
+        icon: 'DataBoard',
+        parentId: '2'
       },
       {
         menuId: '3',
-        menuName: '风险场景',
-        routePath: '/risk-scenarios',
-        icon: 'List',
+        menuName: '传导分析',
+        icon: 'TrendCharts',
         parentId: '0'
+      },
+      {
+        menuId: '3-1',
+        menuName: '风险自动分类分级',
+        routePath: '/risk-analysis/classification',
+        icon: 'Histogram',
+        parentId: '3'
+      },
+      {
+        menuId: '3-2',
+        menuName: '风险传导路径推演',
+        routePath: '/risk-analysis/propagation',
+        icon: 'TrendCharts',
+        parentId: '3'
+      },
+      {
+        menuId: '3-3',
+        menuName: '供应链影响量化测算',
+        routePath: '/risk-analysis/supply-impact',
+        icon: 'DataAnalysis',
+        parentId: '3'
+      },
+      {
+        menuId: '3-4',
+        menuName: '供应商物料区域风险画像',
+        routePath: '/risk-analysis/profile',
+        icon: 'DataBoard',
+        parentId: '3'
+      },
+      {
+        menuId: '3-5',
+        menuName: '风险分析报告',
+        routePath: '/risk-analysis/report',
+        icon: 'Document',
+        parentId: '3'
       },
       {
         menuId: '4',
-        menuName: '费率管理',
-        routePath: '/tariff-management',
-        icon: 'Money',
+        menuName: '协同处置',
+        icon: 'Share',
         parentId: '0'
+      },
+      {
+        menuId: '4-1',
+        menuName: '风险预警管理',
+        routePath: '/risk-disposal/warning',
+        icon: 'Warning',
+        parentId: '4'
+      },
+      {
+        menuId: '4-2',
+        menuName: '应对措施库',
+        routePath: '/risk-disposal/response',
+        icon: 'Tools',
+        parentId: '4'
+      },
+      {
+        menuId: '4-3',
+        menuName: '智能方案推荐与审批',
+        routePath: '/risk-disposal/smart-plan',
+        icon: 'DataAnalysis',
+        parentId: '4'
+      },
+      {
+        menuId: '4-4',
+        menuName: '任务工单管理',
+        routePath: '/risk-disposal/tasks',
+        icon: 'List',
+        parentId: '4'
+      },
+      {
+        menuId: '4-5',
+        menuName: '跨部门协同跟踪',
+        routePath: '/risk-disposal/cross-tracking',
+        icon: 'Share',
+        parentId: '4'
+      },
+      {
+        menuId: '4-6',
+        menuName: '处置进度大屏',
+        routePath: '/risk-disposal/dashboard',
+        icon: 'DataBoard',
+        parentId: '4'
       },
       {
         menuId: '5',
-        menuName: '费率模拟',
-        routePath: '/tariff-simulation',
-        icon: 'Tools',
+        menuName: '闭环学习',
+        icon: 'Document',
         parentId: '0'
       },
       {
+        menuId: '5-1',
+        menuName: '风险事件复盘',
+        routePath: '/risk-learning/review',
+        icon: 'Document',
+        parentId: '5'
+      },
+      {
+        menuId: '5-2',
+        menuName: '案例库管理',
+        routePath: '/risk-learning/cases',
+        icon: 'Files',
+        parentId: '5'
+      },
+      {
+        menuId: '5-3',
+        menuName: '预警规则优化',
+        routePath: '/risk-learning/warning-optimize',
+        icon: 'Tools',
+        parentId: '5'
+      },
+      {
+        menuId: '5-4',
+        menuName: '风险模型参数优化',
+        routePath: '/risk-learning/model-optimize',
+        icon: 'DataAnalysis',
+        parentId: '5'
+      },
+      {
+        menuId: '5-5',
+        menuName: '应对措施迭代',
+        routePath: '/risk-learning/response-iterate',
+        icon: 'TrendCharts',
+        parentId: '5'
+      },
+      {
+        menuId: '5-6',
+        menuName: '知识沉淀与经验库',
+        routePath: '/risk-learning/knowledge',
+        icon: 'Files',
+        parentId: '5'
+      },
+      {
         menuId: '6',
-        menuName: '系统设置',
+        menuName: '系统管理',
         icon: 'Setting',
         parentId: '0'
       },
       {
         menuId: '6-1',
-        menuName: '用户管理',
-        routePath: '/system/user',
-        icon: 'Avatar',
+        menuName: '用户与权限',
+        routePath: '/system-management/user-permission',
+        icon: 'User',
         parentId: '6'
       },
       {
         menuId: '6-2',
-        menuName: '角色管理',
-        routePath: '/system/role',
-        icon: 'Share',
+        menuName: '系统参数配置',
+        routePath: '/system-management/system-config',
+        icon: 'Setting',
         parentId: '6'
       },
       {
         menuId: '6-3',
-        menuName: '菜单管理',
-        routePath: '/system/menu',
-        icon: 'List',
+        menuName: '接口对接管理',
+        routePath: '/system-management/interface',
+        icon: 'Share',
+        parentId: '6'
+      },
+      {
+        menuId: '6-4',
+        menuName: '日志审计',
+        routePath: '/system-management/log-audit',
+        icon: 'Document',
+        parentId: '6'
+      },
+      {
+        menuId: '6-5',
+        menuName: '数据备份与恢复',
+        routePath: '/system-management/backup',
+        icon: 'Files',
+        parentId: '6'
+      },
+      {
+        menuId: '6-6',
+        menuName: '公告与帮助中心',
+        routePath: '/system-management/announcement',
+        icon: 'Document',
         parentId: '6'
       },
       {
         menuId: '7',
-        menuName: '算法概览',
-        routePath: '/algorithm-overview',
-        icon: 'Tools',
+        menuName: '基础数据',
+        icon: 'DataBoard',
         parentId: '0'
+      },
+      {
+        menuId: '7-1',
+        menuName: '风险分类分级定义',
+        routePath: '/basic-data/classification-definition',
+        icon: 'Histogram',
+        parentId: '7'
       }
     ]
     
@@ -404,7 +588,7 @@ onUnmounted(() => {
 
 .main {
   background: #f0f2f5;
-  padding: 15px;
+  padding: 8px;
   overflow-y: auto;
   flex: 1;
 }

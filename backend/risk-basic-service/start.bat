@@ -9,4 +9,4 @@ set CALLBACK_URL=http://localhost:8080
 set SERVER_PORT=8080
 set SPRING_PROFILES_ACTIVE=local
 cd /d %~dp0
-call mvn spring-boot:run
+call "D:\SOLO_Project\HaierRiskDemo\apache-maven-3.8.8\bin\mvn" spring-boot:run

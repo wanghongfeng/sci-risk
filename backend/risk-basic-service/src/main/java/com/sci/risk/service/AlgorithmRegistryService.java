@@ -81,7 +81,7 @@ public class AlgorithmRegistryService {
         info.setVersion((String) algo.get("version"));
         info.setDescription((String) algo.get("description"));
         info.setCategory((String) algo.get("category"));
-        info.setType((String) algo.get("type"));
+        info.setType((String) algo.get("algo_type"));
         info.setLabel((String) algo.get("label"));
 
         Object endpoint = algo.get("endpoint");
